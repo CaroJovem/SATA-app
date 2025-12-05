@@ -52,8 +52,8 @@ app.use(cors({
         const allowList = ['http://localhost:5173', 'http://localhost:5174'];
         if (process.env.CORS_ORIGIN) allowList.push(process.env.CORS_ORIGIN);
         const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
-        const isVercel = /^https?:\/\/[^\s]+\.vercel\.app$/i.test(origin);
-        if (allowList.includes(origin) || isLocalhost || isVercel) return callback(null, true);
+        const isNetlify = /^https?:\/\/[^\s]+\.netlify\.app$/i.test(origin);
+        if (allowList.includes(origin) || isLocalhost || isNetlify) return callback(null, true);
         return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -90,9 +90,6 @@ function sseBroadcast(event, data) {
   }
 }
 app.get('/api/notificacoes/stream', (req, res) => {
-  if (process.env.VERCEL === '1') {
-    return res.status(501).json({ success: false, error: 'SSE indisponível no ambiente serverless' });
-  }
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
