@@ -13,8 +13,11 @@ const ssl = (sslEn === 'true' || sslEn === '1') ? {
   ca: process.env.DB_SSL_CA || undefined,
 } : undefined;
 
+const RESOLVED_HOST = process.env.DB_HOST || process.env.MYSQLHOST || process.env.RAILWAY_PRIVATE_DOMAIN || process.env.RAILWAY_TCP_PROXY_DOMAIN;
+if (!RESOLVED_HOST) { throw new Error('DB host not configured'); }
+
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.RAILWAY_PRIVATE_DOMAIN || 'localhost',
+  host: RESOLVED_HOST,
   user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
   password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'admin123',
   database: process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway',
