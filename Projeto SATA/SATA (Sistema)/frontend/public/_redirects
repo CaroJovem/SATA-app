@@ -1,2 +1,6 @@
 /* /index.html 200
 
+# Proxy API para backend no Railway
+# Substitua a URL abaixo pelo seu domínio público do backend
+/api/* https://sata-app-production.up.railway.app/ 200
+

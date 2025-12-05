@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { log } = require('../utils/auditLogger');
-const DB_NAME = process.env.DB_NAME || 'sistema_idosos';
+const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway';
 const SQL_SCHEMA_FILE = path.resolve(__dirname, 'Tabelas.sql');
 
 const sslEn = String(process.env.DB_SSL || '').toLowerCase();
@@ -14,11 +14,11 @@ const ssl = (sslEn === 'true' || sslEn === '1') ? {
 } : undefined;
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'admin123',
-  database: process.env.DB_NAME || 'sistema_idosos',
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.RAILWAY_PRIVATE_DOMAIN || 'localhost',
+  user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
+  password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'admin123',
+  database: process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway',
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : (process.env.MYSQLPORT ? Number(process.env.MYSQLPORT) : (process.env.RAILWAY_TCP_PROXY_PORT ? Number(process.env.RAILWAY_TCP_PROXY_PORT) : 3306)),
   waitForConnections: true,
   connectionLimit: process.env.DB_POOL_SIZE ? Number(process.env.DB_POOL_SIZE) : 10,
   queueLimit: 0,
