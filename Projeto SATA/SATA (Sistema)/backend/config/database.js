@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+const hasCloudEnv = !!(process.env.RAILWAY_PRIVATE_DOMAIN || process.env.RAILWAY_TCP_PROXY_DOMAIN || process.env.MYSQLHOST);
+if (!hasCloudEnv) { try { require('dotenv').config(); } catch (_) {} }
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -13,15 +14,25 @@ const ssl = (sslEn === 'true' || sslEn === '1') ? {
   ca: process.env.DB_SSL_CA || undefined,
 } : undefined;
 
-const RESOLVED_HOST = process.env.DB_HOST || process.env.MYSQLHOST || process.env.RAILWAY_PRIVATE_DOMAIN || process.env.RAILWAY_TCP_PROXY_DOMAIN;
+const RESOLVED_HOST = process.env.MYSQLHOST || process.env.RAILWAY_PRIVATE_DOMAIN || process.env.RAILWAY_TCP_PROXY_DOMAIN || process.env.DB_HOST;
 if (!RESOLVED_HOST) { throw new Error('DB host not configured'); }
+let RESOLVED_PORT;
+if (RESOLVED_HOST === process.env.RAILWAY_TCP_PROXY_DOMAIN && process.env.RAILWAY_TCP_PROXY_PORT) {
+  RESOLVED_PORT = Number(process.env.RAILWAY_TCP_PROXY_PORT);
+} else if (process.env.DB_PORT) {
+  RESOLVED_PORT = Number(process.env.DB_PORT);
+} else if (process.env.MYSQLPORT) {
+  RESOLVED_PORT = Number(process.env.MYSQLPORT);
+} else {
+  RESOLVED_PORT = 3306;
+}
 
 const pool = mysql.createPool({
   host: RESOLVED_HOST,
   user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
   password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'admin123',
   database: process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway',
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : (process.env.MYSQLPORT ? Number(process.env.MYSQLPORT) : (process.env.RAILWAY_TCP_PROXY_PORT ? Number(process.env.RAILWAY_TCP_PROXY_PORT) : 3306)),
+  port: RESOLVED_PORT,
   waitForConnections: true,
   connectionLimit: process.env.DB_POOL_SIZE ? Number(process.env.DB_POOL_SIZE) : 10,
   queueLimit: 0,
