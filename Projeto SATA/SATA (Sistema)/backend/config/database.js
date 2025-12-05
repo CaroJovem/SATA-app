@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { log } = require('../utils/auditLogger');
-const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway';
+const DB_NAME = process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'railway';
 const SQL_SCHEMA_FILE = path.resolve(__dirname, 'Tabelas.sql');
 
 const sslEn = String(process.env.DB_SSL || '').toLowerCase();
