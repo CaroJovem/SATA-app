@@ -197,21 +197,11 @@ async function sendValidationEmail({ email, username, token }) {
     let transporter;
     try {
       transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
-      const verifyTimeout = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP verify timeout')), 8000));
-      await Promise.race([transporter.verify(), verifyTimeout]);
     } catch (e) {
       try {
-        if (String(smtpHost).includes('gmail.com')) {
-          transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
-          const verifyTimeout2 = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP verify timeout')), 8000));
-          await Promise.race([transporter.verify(), verifyTimeout2]);
-        } else {
-          console.error('SMTP indisponível:', e.message);
-          console.log('SMTP não configurado. Link de validação:', link);
-          return;
-        }
+        transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
       } catch (e2) {
-        console.error('Falha ao verificar SMTP:', e2.message);
+        console.error('SMTP indisponível:', e.message);
         console.log('SMTP não configurado. Link de validação:', link);
         return;
       }

@@ -236,24 +236,10 @@ class AuthController {
           const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
           const baseOpts = { host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 };
           let transporter = nodemailer.createTransport(baseOpts);
-          const verifyTimeout = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP verify timeout')), 8000));
-          await Promise.race([transporter.verify(), verifyTimeout]);
-          
-          
-          
-          
-          
-          
-        } catch (e) {
-          try {
-            if (String(smtpHost).includes('gmail.com')) {
-              const transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
-              const verifyTimeout2 = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP verify timeout')), 8000));
-              await Promise.race([transporter.verify(), verifyTimeout2]);
-              const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
-              const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
-              const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
-              const html = `
+          const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
+          const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
+          const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
+          const html = `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
               <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${preheader}</div>
               <h2 style="color:#1976d2;margin:0 0 16px">Redefinir senha</h2>
@@ -267,17 +253,34 @@ class AuthController {
               <p style="font-size:12px;color:#666;margin:0">${fromName} · Sistema de Gestão · Suporte: ${fromAddr}</p>
             </div>
           `;
-              const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
-              await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
-            } else {
-              console.error('SMTP indisponível:', e.message);
-              return res.json({ success: true, token });
-            }
+          const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
+          await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
+        } catch (e) {
+          try {
+            const transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
+            const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
+            const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
+            const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
+            const html = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+              <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${preheader}</div>
+              <h2 style="color:#1976d2;margin:0 0 16px">Redefinir senha</h2>
+              <p style="margin:0 0 12px">Olá ${user.username || ''},</p>
+              <p style="margin:0 0 16px">Recebemos uma solicitação para redefinir sua senha. Clique no botão abaixo para prosseguir. Este link é válido por 15 minutos.</p>
+              <p style="text-align:center;margin:24px 0">
+                <a href="${resetLink}" style="background:#1976d2;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block">Redefinir senha</a>
+              </p>
+              <p style="margin:0 0 12px">Se você não solicitou esta alteração, ignore este email.</p>
+              <hr style="margin:24px 0;border:none;border-top:1px solid #eee"/>
+              <p style="font-size:12px;color:#666;margin:0">${fromName} · Sistema de Gestão · Suporte: ${fromAddr}</p>
+            </div>
+          `;
+            const timeoutSend2 = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
+            await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend2]);
           } catch (mailErr2) {
             console.error('Falha ao enviar email de recuperação:', mailErr2.message);
             return res.json({ success: true, token });
           }
-          return res.json({ success: true });
         }
         const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
         const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
