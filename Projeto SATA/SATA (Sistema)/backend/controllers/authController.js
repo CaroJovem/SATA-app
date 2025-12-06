@@ -7,6 +7,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const https = require('https');
+const net = require('net');
+const dns = require('dns');
 const UserRepository = require('../repository/userRepository');
 const User = require('../models/user');
 const { checkPassword } = require('../utils/passwordPolicy');
@@ -239,6 +242,71 @@ class AuthController {
       const frontUrl = String(frontUrlRaw).trim().replace(/^"|"$/g, '');
       const resetLink = `${frontUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
+      // Envio por API de e-mail (se configurado)
+      const emailProvider = process.env.EMAIL_PROVIDER;
+      const emailApiKey = process.env.EMAIL_API_KEY;
+      const emailDomain = process.env.EMAIL_DOMAIN;
+      const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
+      const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
+      const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
+      const html = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+              <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${preheader}</div>
+              <h2 style="color:#1976d2;margin:0 0 16px">Redefinir senha</h2>
+              <p style="margin:0 0 12px">Olá ${user.username || ''},</p>
+              <p style="margin:0 0 16px">Recebemos uma solicitação para redefinir sua senha. Clique no botão abaixo para prosseguir. Este link é válido por 15 minutos.</p>
+              <p style="text-align:center;margin:24px 0">
+                <a href="${resetLink}" style="background:#1976d2;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block">Redefinir senha</a>
+              </p>
+              <p style="margin:0 0 12px">Se você não solicitou esta alteração, ignore este email.</p>
+              <hr style="margin:24px 0;border:none;border-top:1px solid #eee"/>
+              <p style="font-size:12px;color:#666;margin:0">${fromName} · Sistema de Gestão · Suporte: ${fromAddr}</p>
+            </div>
+          `;
+      const text = `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`;
+      if (emailProvider && emailApiKey) {
+        try {
+          const prov = String(emailProvider).toLowerCase();
+          if (prov === 'resend') {
+            const payload = JSON.stringify({ from: `${fromName} <${fromAddr}>`, to: user.email || email, subject: 'Redefinição de senha | SATA', html, text, headers: { 'X-Auto-Response-Suppress': 'All' } });
+            await new Promise((resolve, reject) => {
+              const req = https.request('https://api.resend.com/emails', { method: 'POST', headers: { 'Authorization': `Bearer ${emailApiKey}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } }, (resp) => {
+                const chunks = [];
+                resp.on('data', (d) => chunks.push(d));
+                resp.on('end', () => {
+                  const code = resp.statusCode || 0;
+                  if (code >= 200 && code < 300) resolve(); else reject(new Error(`resend ${code}`));
+                });
+              });
+              req.on('error', reject);
+              req.setTimeout(10000, () => { req.destroy(new Error('api timeout')); });
+              req.write(payload);
+              req.end();
+            });
+            try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_email', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'resend' } }); } catch {}
+            return res.json({ success: true });
+          } else if (prov === 'sendgrid') {
+            const sgBody = JSON.stringify({ personalizations: [{ to: [{ email: user.email || email }] }], from: { email: fromAddr, name: fromName }, subject: 'Redefinição de senha | SATA', content: [{ type: 'text/plain', value: text }, { type: 'text/html', value: html }] });
+            await new Promise((resolve, reject) => {
+              const req = https.request('https://api.sendgrid.com/v3/mail/send', { method: 'POST', headers: { 'Authorization': `Bearer ${emailApiKey}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(sgBody) } }, (resp) => {
+                const code = resp.statusCode || 0;
+                if (code === 202 || (code >= 200 && code < 300)) resolve(); else reject(new Error(`sendgrid ${code}`));
+              });
+              req.on('error', reject);
+              req.setTimeout(10000, () => { req.destroy(new Error('api timeout')); });
+              req.write(sgBody);
+              req.end();
+            });
+            try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_email', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'sendgrid' } }); } catch {}
+            return res.json({ success: true });
+          } else if (prov === 'mailgun' && emailDomain) {
+            // Implementação via API pode ser adicionada quando EMAIL_DOMAIN estiver disponível
+          }
+        } catch (apiErr) {
+          console.info('Email API indisponível:', apiErr.message);
+        }
+      }
+
       // Envio de email (SMTP configurável)
       const smtpHost = process.env.SMTP_HOST;
       const smtpPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
@@ -427,6 +495,59 @@ class AuthController {
       return res.status(500).json({ success: false, error: 'Erro ao trocar senha', detail: err.message });
     }
   }
+  async diagnoseSmtp(req, res) {
+    try {
+      const svc = String(process.env.SMTP_SERVICE || '').toLowerCase();
+      const hostEnv = process.env.SMTP_HOST || '';
+      const user = process.env.SMTP_USER || '';
+      const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
+      const secure = (process.env.SMTP_SECURE === 'true');
+      const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : (secure ? 465 : 587);
+      const host = svc === 'gmail' ? 'smtp.gmail.com' : hostEnv;
+      const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true' || (!secure);
+      const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+      const summary = { host, port, service: svc || null, secure, requireTLS, rejectUnauthorized, user: user ? `${user.slice(0,2)}***@***` : null, passLen: pass.length };
+      console.info('[SMTP DIAG] summary', summary);
+      let resolveInfo = null;
+      try {
+        resolveInfo = await new Promise((resolve, reject) => dns.lookup(host, { all: true }, (err, addrs) => err ? reject(err) : resolve(addrs)));
+        console.info('[SMTP DIAG] dns', resolveInfo);
+      } catch (e) {
+        console.error('[SMTP DIAG] dns_error', { message: e.message, code: e.code });
+      }
+      let tcpInfo = { ok: false };
+      try {
+        tcpInfo = await new Promise((resolve) => {
+          const s = net.createConnection({ host, port });
+          const start = Date.now();
+          let done = false;
+          const finish = (ok, err) => { if (done) return; done = true; try { s.destroy(); } catch(_){}; resolve({ ok, ms: Date.now()-start, error: err ? { message: err.message, code: err.code, syscall: err.syscall } : null }); };
+          s.setTimeout(6000);
+          s.on('connect', () => finish(true));
+          s.on('timeout', () => finish(false, new Error('tcp timeout')));
+          s.on('error', (err) => finish(false, err));
+        });
+        console.info('[SMTP DIAG] tcp', tcpInfo);
+      } catch (e) {
+        console.error('[SMTP DIAG] tcp_exception', { message: e.message, code: e.code });
+      }
+      let nmResult = { ok: false };
+      try {
+        const transporter = nodemailer.createTransport({ host, port, secure, requireTLS, tls: { rejectUnauthorized }, auth: user && pass ? { user, pass } : undefined, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000, logger: true, debug: true });
+        const start = Date.now();
+        await transporter.verify();
+        nmResult = { ok: true, ms: Date.now() - start };
+        console.info('[SMTP DIAG] verify_ok', nmResult);
+      } catch (e) {
+        nmResult = { ok: false, error: { message: e.message, code: e.code, command: e.command, response: e.response } };
+        console.error('[SMTP DIAG] verify_err', nmResult.error);
+      }
+      return res.json({ success: true, data: { summary, dns: resolveInfo, tcp: tcpInfo, verify: nmResult } });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: 'Falha no diagnóstico SMTP', detail: err.message });
+    }
+  }
+
 }
 
 module.exports = new AuthController();

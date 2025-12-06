@@ -26,6 +26,7 @@ function rateLimit({ windowMs, max }) {
 router.post('/login', rateLimit({ windowMs: 10 * 60 * 1000, max: 30 }), (req, res) => authController.login(req, res));
 router.post('/logout', (req, res) => authController.logout(req, res));
 router.get('/me', authenticate, (req, res) => authController.me(req, res));
+router.get('/diagnose-smtp', authenticate, authorizeRoles('Admin'), (req, res) => authController.diagnoseSmtp(req, res));
 
 // Recuperação e troca de senha
 router.post('/forgot-password', rateLimit({ windowMs: 15 * 60 * 1000, max: 5 }), (req, res) => authController.forgotPassword(req, res));
