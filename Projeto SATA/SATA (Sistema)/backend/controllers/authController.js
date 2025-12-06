@@ -317,16 +317,27 @@ class AuthController {
       if ((smtpHost || smtpService) && smtpUser && smtpPass) {
         try {
           const isGmail = (String(smtpService).toLowerCase() === 'gmail') || (String(smtpHost).toLowerCase().includes('smtp.gmail.com'));
-          const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
-          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true' || (!secure);
+          const secureCfg = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
+          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true' || (!secureCfg);
           const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
-          let transporter;
-          if (isGmail) {
-            const finalPort = secure ? 465 : 587;
-            transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: finalPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
-          } else {
-            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
-          }
+          let host = isGmail ? 'smtp.gmail.com' : smtpHost;
+          let port = secureCfg ? 465 : 587;
+          try {
+            const tcpProbe = await new Promise((resolve) => {
+              const s = net.createConnection({ host, port });
+              const start = Date.now();
+              let done = false;
+              const finish = (ok, err) => { if (done) return; done = true; try { s.destroy(); } catch(_){}; resolve({ ok, ms: Date.now()-start, err }); };
+              s.setTimeout(5000);
+              s.on('connect', () => finish(true));
+              s.on('timeout', () => finish(false, new Error('tcp timeout')));
+              s.on('error', (err) => finish(false, err));
+            });
+            console.info('[SMTP SEND] probe', { host, port, ok: tcpProbe.ok, ms: tcpProbe.ms, err: tcpProbe.err ? { code: tcpProbe.err.code, message: tcpProbe.err.message } : null });
+            if (!tcpProbe.ok && isGmail && port === 587) { port = 465; }
+          } catch (_) {}
+          const secure = port === 465;
+          const transporter = nodemailer.createTransport({ host, port, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 9000, greetingTimeout: 9000, socketTimeout: 13000, logger: true, debug: true });
           const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
           const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
           const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
@@ -348,7 +359,7 @@ class AuthController {
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (e) {
           try {
-            const transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, tls: { rejectUnauthorized: true }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
+            const transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, requireTLS: false, tls: { rejectUnauthorized: true }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 9000, greetingTimeout: 9000, socketTimeout: 13000, logger: true, debug: true });
             const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
             const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
             const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
@@ -369,7 +380,7 @@ class AuthController {
             const timeoutSend2 = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
             await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend2]);
           } catch (mailErr2) {
-            console.info('Envio de recuperação indisponível:', mailErr2.message);
+            console.info('Envio de recuperação indisponível:', mailErr2.message, { host: smtpHost, port: smtpPort, secure: (process.env.SMTP_SECURE === 'true'), code: mailErr2.code });
             try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'smtp_unavailable', email } }); } catch {}
             return res.json({ success: true, token });
           }
@@ -406,7 +417,7 @@ class AuthController {
           const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 12000));
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (sendErr) {
-          console.info('Envio de recuperação indisponível:', sendErr.message);
+          console.info('Envio de recuperação indisponível:', sendErr.message, { host: smtpHost, port: smtpPort, secure: (process.env.SMTP_SECURE === 'true'), code: sendErr.code });
           try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'smtp_timeout', email } }); } catch {}
           return res.json({ success: true, token });
         }
