@@ -262,6 +262,48 @@ async function ensureIntegrity() {
   const changes = [];
   const errors = [];
   try {
+    const [colPrecoRows] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='produtos' AND COLUMN_NAME='preco'`,
+      [DB_NAME]
+    );
+    const hasPreco = Number(colPrecoRows?.[0]?.cnt || 0) > 0;
+    if (!hasPreco) {
+      try {
+        await conn.query(`ALTER TABLE produtos ADD COLUMN preco decimal(10,2) NOT NULL DEFAULT 0.00`);
+        changes.push('produtos.add_column_preco');
+      } catch (e) {
+        errors.push({ action: 'produtos.add_column_preco', error: e.message });
+      }
+    }
+
+    const [colQtdRows] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='produtos' AND COLUMN_NAME='quantidade'`,
+      [DB_NAME]
+    );
+    const hasQuantidade = Number(colQtdRows?.[0]?.cnt || 0) > 0;
+    if (!hasQuantidade) {
+      try {
+        await conn.query(`ALTER TABLE produtos ADD COLUMN quantidade int(11) NOT NULL DEFAULT 0`);
+        changes.push('produtos.add_column_quantidade');
+      } catch (e) {
+        errors.push({ action: 'produtos.add_column_quantidade', error: e.message });
+      }
+    }
+
+    const [colDescRows] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='produtos' AND COLUMN_NAME='descricao'`,
+      [DB_NAME]
+    );
+    const hasDescricao = Number(colDescRows?.[0]?.cnt || 0) > 0;
+    if (!hasDescricao) {
+      try {
+        await conn.query(`ALTER TABLE produtos ADD COLUMN descricao text DEFAULT NULL`);
+        changes.push('produtos.add_column_descricao');
+      } catch (e) {
+        errors.push({ action: 'produtos.add_column_descricao', error: e.message });
+      }
+    }
+
     // Verificar/ criar coluna gerada nome_norm em produtos
     const [colRows] = await conn.query(
       `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='produtos' AND COLUMN_NAME='nome_norm'`,
