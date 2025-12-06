@@ -1,6 +1,7 @@
 async function main() {
   const tests = [
     require('./security.reset.test'),
+    require('./security.access.test'),
   ];
   for (const t of tests) {
     await t();

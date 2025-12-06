@@ -32,6 +32,7 @@ router.post('/:id/resend-validation', authenticate, authorizeRoles('Admin'), (re
   next();
 }, (req, res) => usersController.resendValidation(req, res));
 router.get('/validate-email', (req, res) => usersController.validateEmail(req, res));
+router.get('/me/permissions', authenticate, (req, res) => usersController.getPermissions(req, res));
 
 module.exports = router;
 /*

@@ -215,6 +215,20 @@ class AuthController {
       if (!email) return res.status(400).json({ success: false, error: 'Email é obrigatório' });
       const user = await UserRepository.findByEmail(email);
       if (!user) return res.status(200).json({ success: true }); // evitar enumeração de usuários
+      try {
+        const actor = req.user ? await UserRepository.findById(req.user.id) : null;
+        if (actor && String(actor.role).toLowerCase() === 'admin') {
+          if (String(user.role).toLowerCase() === 'admin' && Number(actor.id) !== Number(user.id)) {
+            try { await require('../config/database').query('INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(?,?,0,?)', [actor.id, user.id, 'blocked: admin->admin forgot']); } catch {}
+            return res.status(403).json({ success: false, error: 'Reset de senha não permitido entre administradores' });
+          }
+          const canReset = Number(actor.can_reset_passwords || 0) === 1;
+          if (String(user.role).toLowerCase() !== 'admin' && !canReset) {
+            try { await require('../config/database').query('INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(?,?,0,?)', [actor.id, user.id, 'blocked: admin lacks privilege']); } catch {}
+            return res.status(403).json({ success: false, error: 'Permissão insuficiente para resetar senha de funcionários' });
+          }
+        }
+      } catch {}
       // Sem validação de bloqueio admin→admin no fluxo de esqueci a senha
       const secret = process.env.JWT_SECRET;
       if (!secret) return res.status(500).json({ success: false, error: 'Configuração de JWT ausente' });
@@ -285,6 +299,7 @@ class AuthController {
             await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend2]);
           } catch (mailErr2) {
             console.info('Envio de recuperação indisponível:', mailErr2.message);
+            try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'smtp_unavailable', email } }); } catch {}
             return res.json({ success: true, token });
           }
         }
@@ -319,11 +334,13 @@ class AuthController {
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (sendErr) {
           console.info('Envio de recuperação indisponível:', sendErr.message);
+          try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'smtp_timeout', email } }); } catch {}
           return res.json({ success: true, token });
         }
       } else {
         // Ambiente sem SMTP: retornar token para facilitar testes locais
         console.log(`Link de reset para ${user.username} (${user.email || email}): ${resetLink}`);
+        try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'no_smtp', email } }); } catch {}
         return res.json({ success: true, token });
       }
 

@@ -32,7 +32,7 @@ const UserRepository = {
     const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
     return rows[0] || null;
   },
-  async create({ username, email, password_hash, role = 'Funcionário', status = 'inativo' }) {
+  async create({ username, email, password_hash, role = 'Funcionário', status = 'ativo' }) {
     try {
       const [result] = await db.execute('INSERT INTO users (username, email, password_hash, role, status) VALUES (?,?,?,?,?)', [username, email, password_hash, role, status]);
       return result.insertId;

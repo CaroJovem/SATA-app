@@ -38,8 +38,8 @@ class UsersController {
   /*
     Criação de usuário
     Parâmetros (body): `username`, `email`, `role`, `password`
-    - Valida entrada, unicidade e política de senha; cria perfil com status `inativo`.
-    - Gera token de validação de email com validade de 24h e envia mensagem.
+    - Valida entrada, unicidade e política de senha; cria perfil com status `ativo`.
+    - Envio de email de validação desativado.
   */
   async create(req, res) {
     try {
@@ -55,15 +55,9 @@ class UsersController {
       if (existingEmail) return res.status(409).json({ success: false, error: 'Email já utilizado' });
       const bcrypt = require('bcryptjs');
       const ph = await bcrypt.hash(String(password), 10);
-      const id = await UserRepository.create({ username, email, password_hash: ph, role: normalizeRole(role), status: 'inativo' });
-
-      const token = crypto.randomBytes(24).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      await UserRepository.setEmailValidationToken(id, token, expiresAt);
-
-      await sendValidationEmail({ email, username, token });
-      try { const { log } = require('../utils/auditLogger'); log('user.create', { id, username, email, role: normalizeRole(role), status: 'inativo', actor: req.user || null }); } catch {}
-      return res.status(201).json({ success: true, message: 'Perfil criado. Enviamos um email de confirmação com validade de 24h.', data: { id, username, email, role: normalizeRole(role), status: 'inativo' } });
+      const id = await UserRepository.create({ username, email, password_hash: ph, role: normalizeRole(role), status: 'ativo' });
+      try { const { log } = require('../utils/auditLogger'); log('user.create', { id, username, email, role: normalizeRole(role), status: 'ativo', actor: req.user || null }); } catch {}
+      return res.status(201).json({ success: true, message: 'Perfil criado com sucesso.', data: { id, username, email, role: normalizeRole(role), status: 'ativo' } });
     } catch (err) {
       return res.status(500).json({ success: false, error: 'Erro ao criar usuário', detail: err.message });
     }
@@ -119,44 +113,34 @@ class UsersController {
 
   /*
     Validar email
-    Parâmetros: `token` (query|params|body)
-    - Confirma validação se token é válido e dentro do prazo.
+    - Desativado: fluxo de validação por email removido.
   */
   async validateEmail(req, res) {
-    try {
-      const raw = (req.query && req.query.token) || (req.params && req.params.token) || (req.body && req.body.token) || '';
-      const token = String(raw || '').trim();
-      if (!token) return res.status(400).json({ success: false, error: 'Token ausente' });
-      const user = await UserRepository.findByValidationToken(token);
-      if (!user) return res.status(400).json({ success: false, error: 'Token inválido' });
-      const exp = user.email_validation_expires_at ? new Date(user.email_validation_expires_at).getTime() : 0;
-      if (Date.now() > exp) return res.status(400).json({ success: false, error: 'Token expirado' });
-      await UserRepository.confirmEmailValidation(user.id);
-      return res.json({ success: true });
-    } catch (err) {
-      return res.status(500).json({ success: false, error: 'Erro ao validar email', detail: err.message });
-    }
+    return res.status(410).json({ success: false, error: 'Validação por email desativada' });
   }
 
   /*
     Reenviar validação de email
-    Parâmetros: `id` (params)
-    - Gera novo token de 24h e envia email de confirmação.
+    - Desativado: envio de validação por email removido.
   */
   async resendValidation(req, res) {
+    return res.status(410).json({ success: false, error: 'Validação por email desativada' });
+  }
+
+  /*
+    Permissões do usuário autenticado para gerenciamento de senhas
+    - Retorna papel e flag `can_reset_passwords` para o frontend decidir quais opções exibir.
+  */
+  async getPermissions(req, res) {
     try {
-      const { id } = req.params;
-      const u = await UserRepository.findById(id);
+      if (!req.user || !req.user.id) return res.status(401).json({ success: false, error: 'Não autenticado' });
+      const u = await UserRepository.findById(req.user.id);
       if (!u) return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
-      if (String(u.status || '').toLowerCase() === 'ativo') return res.status(400).json({ success: false, error: 'Usuário já está ativo' });
-      const token = crypto.randomBytes(24).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      await UserRepository.setEmailValidationToken(id, token, expiresAt);
-      await sendValidationEmail({ email: u.email, username: u.username, token });
-      try { const { log } = require('../utils/auditLogger'); log('user.resend_validation', { id, email: u.email, actor: req.user || null }); } catch {}
-      return res.json({ success: true, message: 'Reenviamos o email de confirmação. Verifique sua caixa de entrada e spam.' });
+      const role = String(u.role || 'Funcionário');
+      const canReset = Number(u.can_reset_passwords || 0) === 1;
+      return res.json({ success: true, data: { role, can_reset_passwords: canReset, allowed_actions: { reset_employee: role === 'Admin' && canReset, reset_admin_others: false } } });
     } catch (err) {
-      return res.status(500).json({ success: false, error: 'Erro ao reenviar validação', detail: err.message });
+      return res.status(500).json({ success: false, error: 'Erro ao obter permissões', detail: err.message });
     }
   }
 }

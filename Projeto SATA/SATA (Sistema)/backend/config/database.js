@@ -468,15 +468,37 @@ async function ensureIntegrity() {
     );
     hasStatusCol = Number(userStatusColRows?.[0]?.cnt || 0) > 0;
   } catch (_) {}
-  if (!hasStatusCol) {
-    try {
-      await conn.query(`ALTER TABLE users ADD COLUMN status ENUM('ativo','inativo') NOT NULL DEFAULT 'ativo'`);
-      changes.push('users.add_column_status');
-      hasStatusCol = true;
-    } catch (e) {
-      errors.push({ action: 'users.add_column_status', error: e.message });
+    if (!hasStatusCol) {
+      try {
+        await conn.query(`ALTER TABLE users ADD COLUMN status ENUM('ativo','inativo') NOT NULL DEFAULT 'ativo'`);
+        changes.push('users.add_column_status');
+        hasStatusCol = true;
+      } catch (e) {
+        errors.push({ action: 'users.add_column_status', error: e.message });
+      }
     }
-  }
+
+    try {
+      const [permColRows] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='users' AND COLUMN_NAME='can_reset_passwords'`,
+        [DB_NAME]
+      );
+      const hasCanReset = Number(permColRows?.[0]?.cnt || 0) > 0;
+      if (!hasCanReset) {
+        try {
+          await conn.query(`ALTER TABLE users ADD COLUMN can_reset_passwords TINYINT(1) NOT NULL DEFAULT 0`);
+          changes.push('users.add_column_can_reset_passwords');
+        } catch (e) {
+          errors.push({ action: 'users.add_column_can_reset_passwords', error: e.message });
+        }
+      }
+      try {
+        await conn.query(`UPDATE users SET can_reset_passwords = 1 WHERE username = 'S4TAdmin'`);
+        changes.push('users.seed_can_reset_passwords_admin');
+      } catch (e) {
+        errors.push({ action: 'users.seed_can_reset_passwords_admin', error: e.message });
+      }
+    } catch (_) {}
 
     try {
       const [adminRows] = await conn.query(`SELECT id, role${hasStatusCol ? ', status' : ''} FROM users WHERE username = ?`, ['S4TAdmin']);
