@@ -53,6 +53,14 @@ const UserRepository = {
     const [result] = await db.execute('UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?', [password_hash, id]);
     return result.affectedRows === 1;
   },
+  async resetPasswordWithProcedure(actorId, targetId, password_hash) {
+    try {
+      await db.query('CALL sp_reset_password(?,?,?)', [actorId, targetId, password_hash]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
   async updateUser(id, { username, email, role }) {
     const [result] = await db.execute('UPDATE users SET username = ?, email = ?, role = ?, updated_at = NOW() WHERE id = ?', [username, email, role, id]);
     return result.affectedRows === 1;

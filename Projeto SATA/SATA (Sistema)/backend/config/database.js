@@ -575,6 +575,26 @@ async function ensureIntegrity() {
   return { success: errors.length === 0, changes, errors };
 }
 
+async function ensureProcedures() {
+  const conn = await pool.getConnection();
+  const changes = [];
+  const errors = [];
+  try {
+    try {
+      const [r] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA=? AND ROUTINE_NAME='sp_reset_password' AND ROUTINE_TYPE='PROCEDURE'`, [DB_NAME]);
+      const exists = Number(r?.[0]?.cnt || 0) > 0;
+      if (!exists) {
+        const proc = `CREATE PROCEDURE sp_reset_password(IN p_actor_id INT, IN p_target_id INT, IN p_new_hash VARCHAR(255))\nBEGIN\n  DECLARE actor_role VARCHAR(50);\n  DECLARE target_role VARCHAR(50);\n  SELECT role INTO actor_role FROM users WHERE id = p_actor_id;\n  SELECT role INTO target_role FROM users WHERE id = p_target_id;\n  IF actor_role IS NULL THEN SET actor_role = ''; END IF;\n  IF target_role IS NULL THEN SET target_role = ''; END IF;\n  IF LOWER(actor_role) = 'admin' AND LOWER(target_role) = 'admin' AND p_actor_id <> p_target_id THEN\n    INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(p_actor_id, p_target_id, 0, 'blocked: admin->admin');\n    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Admin cannot reset other admin password';\n  ELSE\n    UPDATE users SET password_hash = p_new_hash, updated_at = NOW() WHERE id = p_target_id;\n    INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(p_actor_id, p_target_id, 1, NULL);\n  END IF;\nEND`;
+        await conn.query(proc);
+        changes.push('procedure.sp_reset_password');
+      }
+    } catch (e) {
+      errors.push({ object: 'sp_reset_password', error: e.message });
+    }
+  } finally { conn.release(); }
+  return { success: errors.length === 0, created: changes, errors };
+}
+
 async function testConnection() {
   try {
     const [rows] = await pool.query('SELECT 1');
@@ -610,6 +630,13 @@ async function testConnection() {
     if (idxStatus.created.length) {
       console.log('Índices criados:', idxStatus.created.join(', '));
     }
+    const procStatus = await ensureProcedures();
+    if (procStatus.created.length) {
+      console.log('Procedures criadas:', procStatus.created.join(', '));
+    }
+    if (procStatus.errors.length) {
+      console.error('Erros de procedures:', procStatus.errors.map(e => `${e.object}: ${e.error}`).join(' | '));
+    }
     // Suprimido: não registrar índices já existentes em logs de inicialização
     if (idxStatus.errors.length) {
       console.error('Erros ao criar índices:', idxStatus.errors.map(e => `${e.index}: ${e.error}`).join(' | '));
@@ -644,6 +671,9 @@ module.exports = {
   ensureSchema,
   ensureIndexes,
   ensureIntegrity,
+  ensureTriggers,
+  ensureCollation,
+  ensureProcedures,
 };
 /*
   Configuração de Banco de Dados

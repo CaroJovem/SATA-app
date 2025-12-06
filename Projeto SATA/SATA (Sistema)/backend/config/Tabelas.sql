@@ -285,6 +285,21 @@ CREATE TABLE `notificacoes` (
   CONSTRAINT `fk_notificacoes_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- 16. Auditoria de resets de senha
+CREATE TABLE IF NOT EXISTS `audit_password_resets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `actor_id` int(11) DEFAULT NULL,
+  `target_id` int(11) NOT NULL,
+  `allowed` tinyint(1) NOT NULL DEFAULT 0,
+  `reason` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_audit_actor` (`actor_id`),
+  KEY `idx_audit_target` (`target_id`),
+  CONSTRAINT `fk_audit_actor` FOREIGN KEY (`actor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_audit_target` FOREIGN KEY (`target_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- 15. ObservacoesIdosos
 CREATE TABLE `observacoes_idosos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

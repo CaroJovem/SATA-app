@@ -116,7 +116,7 @@ class EventoRepository {
   async findUpcomingEvents(minutos) {
     try {
       const [rows] = await db.execute(
-        `SELECT * FROM eventos WHERE notificar = 1 AND dat-inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL ? MINUTE)`,
+        `SELECT * FROM eventos WHERE notificar = 1 AND data_inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL ? MINUTE)`,
         [minutos]
       );
       return (rows || []).map((r) => new Evento(r));

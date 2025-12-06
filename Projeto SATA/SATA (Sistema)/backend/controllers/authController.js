@@ -215,6 +215,12 @@ class AuthController {
       if (!email) return res.status(400).json({ success: false, error: 'Email é obrigatório' });
       const user = await UserRepository.findByEmail(email);
       if (!user) return res.status(200).json({ success: true }); // evitar enumeração de usuários
+      try {
+        if (req.user && String(req.user.role).toLowerCase() === 'admin' && String(user.role).toLowerCase() === 'admin' && Number(req.user.id) !== Number(user.id)) {
+          try { await require('../config/database').query('INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(?,?,0,?)', [req.user.id, user.id, 'blocked: admin->admin forgot']); } catch {}
+          return res.status(403).json({ success: false, error: 'Reset de senha não permitido entre administradores' });
+        }
+      } catch {}
       const secret = process.env.JWT_SECRET;
       if (!secret) return res.status(500).json({ success: false, error: 'Configuração de JWT ausente' });
       const token = jwt.sign({ action: 'reset', id: user.id, username: user.username }, secret, { expiresIn: '15m' });
@@ -349,7 +355,8 @@ class AuthController {
       }
 
       const hash = await bcrypt.hash(new_password, 10);
-      const ok = await UserRepository.updatePasswordHash(payload.id, hash);
+      const actorId = req.user?.id ? Number(req.user.id) : Number(payload.id);
+      const ok = await UserRepository.resetPasswordWithProcedure(actorId, Number(payload.id), hash);
       if (!ok) return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
       try {
         const { logSecurityEvent } = require('../utils/auditLogger');
@@ -382,7 +389,7 @@ class AuthController {
       const ok = await bcrypt.compare(current_password, user.password_hash);
       if (!ok) return res.status(400).json({ success: false, error: 'Senha atual incorreta' });
       const hash = await bcrypt.hash(new_password, 10);
-      const updated = await UserRepository.updatePasswordHash(user.id, hash);
+      const updated = await UserRepository.resetPasswordWithProcedure(user.id, user.id, hash);
       if (!updated) return res.status(500).json({ success: false, error: 'Não foi possível atualizar a senha' });
       try {
         const { logSecurityEvent } = require('../utils/auditLogger');
