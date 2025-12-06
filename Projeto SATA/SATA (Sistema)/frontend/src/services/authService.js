@@ -56,6 +56,11 @@ const authService = {
     return data;
   },
 
+  async getPermissions() {
+    const { data } = await api.get('/users/me/permissions');
+    return data;
+  },
+
   async adminCreateUser(payload) {
     const { data } = await api.post('/users', payload, { headers: csrfHeader() });
     return data;

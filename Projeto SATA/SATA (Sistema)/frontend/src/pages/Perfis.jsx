@@ -29,6 +29,7 @@ export default function Perfis() {
   const [sortBy, setSortBy] = useState('username');
   const [sortDir, setSortDir] = useState('asc');
   const [visibleCount, setVisibleCount] = useState(50);
+  const [permissoes, setPermissoes] = useState(null);
 
   const [mostrarModalEdicao, setMostrarModalEdicao] = useState(false);
   const [usuarioEditar, setUsuarioEditar] = useState(null);
@@ -70,6 +71,15 @@ export default function Perfis() {
   }, [statusFilter, roleFilter, termoBusca]);
 
   useEffect(() => { carregar(); }, [carregar]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await authService.getPermissions();
+        if (res?.success) setPermissoes(res.data || null);
+      } catch {}
+    })();
+  }, []);
 
   // Abre modal de criação com estado inicial
   const abrirCriacao = () => { setUsuarioEditar(null); setForm({ username: '', email: '', role: 'Funcionário', password: '', confirm: '' }); setPasswordErr(''); setConfirmErr(''); setShowPw(false); setShowConfirm(false); setMostrarModalEdicao(true); };
@@ -294,9 +304,11 @@ export default function Perfis() {
                               <Pencil />
                             </ActionIconButton>
                             {/* Botão de ativar/inativar removido conforme solicitação */}
-                            <ActionIconButton variant="outline-secondary" title="Reset senha" onClick={() => abrirResetModal(r)}>
-                              <ShieldLock />
-                            </ActionIconButton>
+                            {String(r.role) !== 'Admin' && (permissoes?.allowed_actions?.reset_employee === true) && (
+                              <ActionIconButton variant="outline-secondary" title="Reset senha" onClick={() => abrirResetModal(r)}>
+                                <ShieldLock />
+                              </ActionIconButton>
+                            )}
                             
                             <ActionIconButton variant="outline-danger" title="Excluir" onClick={() => confirmarExcluir(r)}>
                               <Trash />
