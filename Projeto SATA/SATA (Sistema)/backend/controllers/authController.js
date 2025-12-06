@@ -235,26 +235,29 @@ class AuthController {
       const token = jwt.sign({ action: 'reset', id: user.id, username: user.username }, secret, { expiresIn: '15m' });
 
       // Link de reset para o frontend
-      const frontUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontUrlRaw = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontUrl = String(frontUrlRaw).trim().replace(/^"|"$/g, '');
       const resetLink = `${frontUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
       // Envio de email (SMTP configurável)
       const smtpHost = process.env.SMTP_HOST;
       const smtpPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
       const smtpUser = process.env.SMTP_USER;
-      const smtpPass = process.env.SMTP_PASS;
+      const smtpPass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
 
       const smtpService = process.env.SMTP_SERVICE;
       if ((smtpHost || smtpService) && smtpUser && smtpPass) {
         try {
+          const isGmail = (String(smtpService).toLowerCase() === 'gmail') || (String(smtpHost).toLowerCase().includes('smtp.gmail.com'));
+          const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
+          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true' || (!secure);
+          const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
           let transporter;
-          if (smtpService) {
-            transporter = nodemailer.createTransport({ service: smtpService, secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          if (isGmail) {
+            const finalPort = secure ? 465 : 587;
+            transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: finalPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
           } else {
-            const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
-            const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
-            const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
-            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
           }
           const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
           const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
@@ -277,7 +280,7 @@ class AuthController {
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (e) {
           try {
-            const transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+            const transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, tls: { rejectUnauthorized: true }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
             const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
             const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
             const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
@@ -321,16 +324,18 @@ class AuthController {
             </div>
           `;
         try {
+          const isGmail = (String(smtpService).toLowerCase() === 'gmail') || (String(smtpHost).toLowerCase().includes('smtp.gmail.com'));
+          const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
+          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true' || (!secure);
+          const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
           let transporter;
-          if (smtpService) {
-            transporter = nodemailer.createTransport({ service: smtpService, secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          if (isGmail) {
+            const finalPort = secure ? 465 : 587;
+            transporter = nodemailer.createTransport({ host: 'smtp.gmail.com', port: finalPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
           } else {
-            const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
-            const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
-            const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
-            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000 });
           }
-          const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 9000));
+          const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 12000));
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (sendErr) {
           console.info('Envio de recuperação indisponível:', sendErr.message);
