@@ -378,28 +378,37 @@ async function ensureIntegrity() {
       }
     } catch (_) {}
 
-    const [userInitColRows] = await conn.query(
+  const [userInitColRows] = await conn.query(
       `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='users' AND COLUMN_NAME='usuario_inicial'`,
       [DB_NAME]
     );
-    const hasUsuarioInicial = Number(userInitColRows?.[0]?.cnt || 0) > 0;
-    if (!hasUsuarioInicial) {
-      try {
-        await conn.query(`ALTER TABLE users ADD COLUMN usuario_inicial TINYINT(1) NOT NULL DEFAULT 0`);
-        changes.push('users.add_column_usuario_inicial');
-      } catch (e) {
-        errors.push({ action: 'users.add_column_usuario_inicial', error: e.message });
-      }
-    }
-
-    let hasStatusCol = false;
+  const hasUsuarioInicial = Number(userInitColRows?.[0]?.cnt || 0) > 0;
+  if (!hasUsuarioInicial) {
     try {
-      const [userStatusColRows] = await conn.query(
-        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='users' AND COLUMN_NAME='status'`,
-        [DB_NAME]
-      );
-      hasStatusCol = Number(userStatusColRows?.[0]?.cnt || 0) > 0;
-    } catch (_) {}
+      await conn.query(`ALTER TABLE users ADD COLUMN usuario_inicial TINYINT(1) NOT NULL DEFAULT 0`);
+      changes.push('users.add_column_usuario_inicial');
+    } catch (e) {
+      errors.push({ action: 'users.add_column_usuario_inicial', error: e.message });
+    }
+  }
+
+  let hasStatusCol = false;
+  try {
+    const [userStatusColRows] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='users' AND COLUMN_NAME='status'`,
+      [DB_NAME]
+    );
+    hasStatusCol = Number(userStatusColRows?.[0]?.cnt || 0) > 0;
+  } catch (_) {}
+  if (!hasStatusCol) {
+    try {
+      await conn.query(`ALTER TABLE users ADD COLUMN status ENUM('ativo','inativo') NOT NULL DEFAULT 'ativo'`);
+      changes.push('users.add_column_status');
+      hasStatusCol = true;
+    } catch (e) {
+      errors.push({ action: 'users.add_column_status', error: e.message });
+    }
+  }
 
     try {
       const [adminRows] = await conn.query(`SELECT id, role${hasStatusCol ? ', status' : ''} FROM users WHERE username = ?`, ['S4TAdmin']);
