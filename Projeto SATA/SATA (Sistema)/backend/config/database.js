@@ -84,14 +84,8 @@ async function ensureSchema() {
       } catch (err) {
         status.success = false;
         status.errors.push({ table: b.name, error: err.message });
-        // rollback manual: remover tabelas criadas nesta execução
-        for (let i = createdThisRun.length - 1; i >= 0; i--) {
-          const t = createdThisRun[i];
-          try {
-            await conn.query(`DROP TABLE IF EXISTS \`${t}\``);
-          } catch (_) {}
-        }
-        break; // interrompe processamento após falha
+        // continua tentando criar demais tabelas para maximizar cobertura
+        continue;
       }
     }
   } finally {
