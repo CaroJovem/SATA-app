@@ -160,13 +160,12 @@ const NotificacaoRepository = {
     sql += ` ORDER BY ${sort} ${order}`;
 
     // Paginação
-    if (filters.limit) {
-      sql += ' LIMIT ?';
-      params.push(parseInt(filters.limit));
-      
-      if (filters.offset) {
-        sql += ' OFFSET ?';
-        params.push(parseInt(filters.offset));
+    const lim = filters.limit ? Math.max(1, parseInt(filters.limit)) : null;
+    const off = filters.offset ? Math.max(0, parseInt(filters.offset)) : null;
+    if (lim != null) {
+      sql += ` LIMIT ${lim}`;
+      if (off != null) {
+        sql += ` OFFSET ${off}`;
       }
     }
 
@@ -246,8 +245,8 @@ const NotificacaoRepository = {
       params.push(usuario_id);
     }
 
-    sql += ' ORDER BY data_criacao DESC LIMIT ?';
-    params.push(limite);
+    const limRecent = Math.max(1, parseInt(limite));
+    sql += ` ORDER BY data_criacao DESC LIMIT ${limRecent}`;
 
     const [rows] = await db.execute(sql, params);
     return rows;

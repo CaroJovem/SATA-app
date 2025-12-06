@@ -10,7 +10,7 @@ const UserRepository = {
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
     const limit = Math.max(1, Number(pageSize));
     const offset = Math.max(0, (Number(page) - 1) * limit);
-    const [rows] = await db.execute(`SELECT * FROM users ${whereSql} ORDER BY id DESC LIMIT ? OFFSET ?`, [...params, limit, offset]);
+    const [rows] = await db.execute(`SELECT * FROM users ${whereSql} ORDER BY id DESC LIMIT ${limit} OFFSET ${offset}`, params);
     const [countRows] = await db.execute(`SELECT COUNT(*) AS total FROM users ${whereSql}`, params);
     const total = (Array.isArray(countRows) && countRows.length) ? Number(countRows[0].total) : 0;
     const items = (rows || []).map(r => ({

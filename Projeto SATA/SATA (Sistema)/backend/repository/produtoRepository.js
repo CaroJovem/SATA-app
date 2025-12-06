@@ -164,8 +164,8 @@ const ProdutoRepository = {
     const offset = Math.max(0, (Math.max(1, Number(page)) - 1) * limit);
 
     const [rows] = await db.execute(
-      `SELECT * FROM produtos ${whereSql} ORDER BY ${validSort} ${validOrder} LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+      `SELECT * FROM produtos ${whereSql} ORDER BY ${validSort} ${validOrder} LIMIT ${limit} OFFSET ${offset}`,
+      params
     );
 
     return { data: rows, total, page: Number(page), pageSize: limit };

@@ -154,8 +154,8 @@ const MovimentoEstoqueRepository = {
        FROM movimentos_estoque
        ${baseWhere}
        ORDER BY ${sortField} ${sortOrder}
-       LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`,
+      params
     );
     const [countRows] = await db.execute(
       `SELECT COUNT(*) AS total FROM movimentos_estoque ${baseWhere}`,
