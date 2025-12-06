@@ -356,9 +356,7 @@ export default function Perfis() {
                       </InputGroup>
                       {confirmErr && <Form.Control.Feedback type="invalid">{confirmErr}</Form.Control.Feedback>}
                     </Form.Group>
-                    <div className="text-muted" style={{ fontSize: '0.9rem' }}>
-                      Após salvar, enviaremos um email com um link de confirmação válido por 24 horas. O perfil será ativado após a confirmação.
-                    </div>
+                    
                   </>
                 )}
               </Form>
