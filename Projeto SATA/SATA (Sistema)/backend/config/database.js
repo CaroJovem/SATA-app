@@ -124,6 +124,38 @@ async function ensureIndexes() {
   return { success: errors.length === 0, created, existing, errors };
 }
 
+async function ensureCollation() {
+  const targetCollation = 'utf8mb4_0900_ai_ci';
+  const targetCharset = 'utf8mb4';
+  const changes = [];
+  const errors = [];
+  try {
+    try {
+      await pool.query(`ALTER DATABASE \`${DB_NAME}\` CHARACTER SET ${targetCharset} COLLATE ${targetCollation}`);
+      changes.push(`database.${DB_NAME}.collation_${targetCollation}`);
+    } catch (_) {}
+    const [rows] = await pool.query(
+      `SELECT TABLE_NAME, TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?`,
+      [DB_NAME]
+    );
+    for (const r of rows || []) {
+      const tName = r.TABLE_NAME;
+      const tColl = r.TABLE_COLLATION || '';
+      if (tColl.toLowerCase() !== targetCollation.toLowerCase()) {
+        try {
+          await pool.query(`ALTER TABLE \`${tName}\` CONVERT TO CHARACTER SET ${targetCharset} COLLATE ${targetCollation}`);
+          changes.push(`table.${tName}.collation_${targetCollation}`);
+        } catch (e) {
+          errors.push({ table: tName, error: e.message });
+        }
+      }
+    }
+  } catch (e) {
+    errors.push({ table: null, error: e.message });
+  }
+  return { success: errors.length === 0, changes, errors };
+}
+
 async function ensureTriggers() {
   const conn = await pool.getConnection();
   const created = [];
@@ -566,6 +598,13 @@ async function testConnection() {
     const ts = new Date().toISOString();
     if (schemaStatus.success && schemaStatus.errors.length === 0) {
       console.log(`[${ts}] VERIFICAÇÃO DE BANCO DE DADOS: Todas as ${schemaStatus.tablesDefined.length} tabelas no banco ${DB_NAME} estão presentes e configuradas corretamente. Tabelas verificadas: [${schemaStatus.tablesDefined.join(', ')}]`);
+    }
+    const collStatus = await ensureCollation();
+    if (collStatus.changes.length) {
+      console.log('Collation ajustada:', collStatus.changes.join(', '));
+    }
+    if (collStatus.errors.length) {
+      console.error('Erros de collation:', collStatus.errors.map(e => `${e.table || 'database'}: ${e.error}`).join(' | '));
     }
     const idxStatus = await ensureIndexes();
     if (idxStatus.created.length) {
