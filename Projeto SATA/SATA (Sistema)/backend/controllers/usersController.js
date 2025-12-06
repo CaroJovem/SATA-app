@@ -194,14 +194,19 @@ async function sendValidationEmail({ email, username, token }) {
     const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
     const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
     const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+    const smtpService = process.env.SMTP_SERVICE;
     let transporter;
     try {
-      transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
+      if (smtpService) {
+        transporter = nodemailer.createTransport({ service: smtpService, secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+      } else {
+        transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+      }
     } catch (e) {
       try {
-        transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
+        transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
       } catch (e2) {
-        console.error('SMTP indisponível:', e.message);
+        console.info('SMTP indisponível:', e.message);
         console.log('SMTP não configurado. Link de validação:', link);
         return;
       }
@@ -225,7 +230,7 @@ async function sendValidationEmail({ email, username, token }) {
       const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
       await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: email, replyTo: fromAddr, subject: 'Confirme seu email | SATA', text: `Olá ${username},\n\nPara concluir seu cadastro no SATA, confirme seu email acessando o link (válido por 24 horas):\n${link}\n\nSe você não solicitou esta confirmação, ignore esta mensagem.\n\n${fromName}`, html: html2, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
     } catch (e3) {
-      console.error('Falha ao enviar email de validação:', e3.message);
+      console.info('Envio de validação indisponível:', e3.message);
       console.log('SMTP não configurado. Link de validação:', link);
       return;
     }

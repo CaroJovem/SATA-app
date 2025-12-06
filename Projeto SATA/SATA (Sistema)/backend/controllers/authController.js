@@ -215,12 +215,7 @@ class AuthController {
       if (!email) return res.status(400).json({ success: false, error: 'Email é obrigatório' });
       const user = await UserRepository.findByEmail(email);
       if (!user) return res.status(200).json({ success: true }); // evitar enumeração de usuários
-      try {
-        if (req.user && String(req.user.role).toLowerCase() === 'admin' && String(user.role).toLowerCase() === 'admin' && Number(req.user.id) !== Number(user.id)) {
-          try { await require('../config/database').query('INSERT INTO audit_password_resets(actor_id, target_id, allowed, reason) VALUES(?,?,0,?)', [req.user.id, user.id, 'blocked: admin->admin forgot']); } catch {}
-          return res.status(403).json({ success: false, error: 'Reset de senha não permitido entre administradores' });
-        }
-      } catch {}
+      // Sem validação de bloqueio admin→admin no fluxo de esqueci a senha
       const secret = process.env.JWT_SECRET;
       if (!secret) return res.status(500).json({ success: false, error: 'Configuração de JWT ausente' });
       const token = jwt.sign({ action: 'reset', id: user.id, username: user.username }, secret, { expiresIn: '15m' });
@@ -235,13 +230,18 @@ class AuthController {
       const smtpUser = process.env.SMTP_USER;
       const smtpPass = process.env.SMTP_PASS;
 
-      if (smtpHost && smtpUser && smtpPass) {
+      const smtpService = process.env.SMTP_SERVICE;
+      if ((smtpHost || smtpService) && smtpUser && smtpPass) {
         try {
-          const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
-          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
-          const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
-          const baseOpts = { host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 };
-          let transporter = nodemailer.createTransport(baseOpts);
+          let transporter;
+          if (smtpService) {
+            transporter = nodemailer.createTransport({ service: smtpService, secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          } else {
+            const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
+            const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
+            const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          }
           const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
           const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
           const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
@@ -263,7 +263,7 @@ class AuthController {
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (e) {
           try {
-            const transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
+            const transporter = nodemailer.createTransport({ service: 'gmail', secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
             const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
             const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
             const preheader = 'Redefina sua senha do SATA. O link expira em 15 minutos.';
@@ -284,7 +284,7 @@ class AuthController {
             const timeoutSend2 = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
             await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend2]);
           } catch (mailErr2) {
-            console.error('Falha ao enviar email de recuperação:', mailErr2.message);
+            console.info('Envio de recuperação indisponível:', mailErr2.message);
             return res.json({ success: true, token });
           }
         }
@@ -306,14 +306,19 @@ class AuthController {
             </div>
           `;
         try {
-          const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
-          const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
-          const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
-          const transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000 });
-          const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 10000));
+          let transporter;
+          if (smtpService) {
+            transporter = nodemailer.createTransport({ service: smtpService, secure: false, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          } else {
+            const secure = (process.env.SMTP_SECURE === 'true') || smtpPort === 465;
+            const requireTLS = process.env.SMTP_REQUIRE_TLS === 'true';
+            const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+            transporter = nodemailer.createTransport({ host: smtpHost, port: smtpPort, secure, requireTLS, tls: { rejectUnauthorized }, auth: { user: smtpUser, pass: smtpPass }, pool: true, maxConnections: 2, connectionTimeout: 7000, greetingTimeout: 7000, socketTimeout: 9000 });
+          }
+          const timeoutSend = new Promise((_, rej) => setTimeout(() => rej(new Error('SMTP send timeout')), 9000));
           await Promise.race([transporter.sendMail({ from: `${fromName} <${fromAddr}>`, to: user.email || email, replyTo: fromAddr, subject: 'Redefinição de senha | SATA', text: `Olá ${user.username || ''},\n\nRecebemos uma solicitação para redefinir sua senha. Acesse o link (válido por 15 minutos):\n${resetLink}\n\nSe você não solicitou esta alteração, ignore este email.\n\n${fromName}`, html, headers: { 'X-Auto-Response-Suppress': 'All' } }), timeoutSend]);
         } catch (sendErr) {
-          console.error('Falha ao enviar email de recuperação:', sendErr.message);
+          console.info('Envio de recuperação indisponível:', sendErr.message);
           return res.json({ success: true, token });
         }
       } else {
