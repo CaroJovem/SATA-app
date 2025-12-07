@@ -299,6 +299,20 @@ class AuthController {
             });
             try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_email', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'sendgrid' } }); } catch {}
             return res.json({ success: true });
+          } else if (prov === 'brevo') {
+            const payload = JSON.stringify({ sender: { email: fromAddr, name: fromName }, to: [{ email: user.email || email }], subject: 'Redefinição de senha | SATA', htmlContent: html, textContent: text, headers: { 'X-Auto-Response-Suppress': 'All' } });
+            await new Promise((resolve, reject) => {
+              const req = https.request('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': emailApiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } }, (resp) => {
+                const code = resp.statusCode || 0;
+                if (code >= 200 && code < 300) resolve(); else reject(new Error(`brevo ${code}`));
+              });
+              req.on('error', reject);
+              req.setTimeout(10000, () => { req.destroy(new Error('api timeout')); });
+              req.write(payload);
+              req.end();
+            });
+            try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_email', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'brevo' } }); } catch {}
+            return res.json({ success: true });
           } else if (prov === 'mailgun' && emailDomain) {
             // Implementação via API pode ser adicionada quando EMAIL_DOMAIN estiver disponível
           }

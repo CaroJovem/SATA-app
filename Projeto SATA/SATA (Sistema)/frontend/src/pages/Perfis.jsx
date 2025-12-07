@@ -155,7 +155,14 @@ export default function Perfis() {
       const em = String(row.email || '').trim();
       if (!em) { setResetStatus('error'); setResetMsg('Usuário não possui email cadastrado. Edite o perfil e informe um email.'); return; }
       const res = await authService.forgotPassword(em);
-      if (res?.success) { setResetStatus('success'); setResetMsg(`Enviamos um link de redefinição para ${em}.`); }
+      if (res?.success) {
+        if (res?.token) {
+          window.location.href = `/reset-password?token=${encodeURIComponent(res.token)}`;
+          return;
+        }
+        setResetStatus('success');
+        setResetMsg(`Se houver um usuário correspondente, enviaremos instruções de redefinição para ${em}.`);
+      }
       else { setResetStatus('error'); setResetMsg(res?.error || 'Falha ao iniciar redefinição'); }
     } catch (e) { setResetStatus('error'); setResetMsg(e?.response?.data?.error || e.message || 'Erro ao iniciar redefinição'); }
   };
