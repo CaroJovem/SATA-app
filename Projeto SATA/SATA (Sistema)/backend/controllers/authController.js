@@ -304,7 +304,12 @@ class AuthController {
             await new Promise((resolve, reject) => {
               const req = https.request('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': emailApiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } }, (resp) => {
                 const code = resp.statusCode || 0;
-                if (code >= 200 && code < 300) resolve(); else reject(new Error(`brevo ${code}`));
+                const chunks = [];
+                resp.on('data', d => chunks.push(d));
+                resp.on('end', () => {
+                  const body = Buffer.concat(chunks).toString('utf8');
+                  if (code >= 200 && code < 300) resolve(); else reject(new Error(`brevo ${code} ${body}`));
+                });
               });
               req.on('error', reject);
               req.setTimeout(10000, () => { req.destroy(new Error('api timeout')); });
@@ -318,6 +323,8 @@ class AuthController {
           }
         } catch (apiErr) {
           console.info('Email API indisponível:', apiErr.message);
+          try { const { logSecurityEvent } = require('../utils/auditLogger'); logSecurityEvent({ type: 'password_reset_request', entity: 'user', entityId: user.id, actor: req.user || null, details: { via: 'api_unavailable', provider: emailProvider, email } }); } catch {}
+          return res.json({ success: true, token });
         }
       }
 
