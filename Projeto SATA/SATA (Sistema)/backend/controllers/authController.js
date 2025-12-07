@@ -244,7 +244,8 @@ class AuthController {
 
       // Envio por API de e-mail (se configurado)
       const emailProvider = process.env.EMAIL_PROVIDER;
-      const emailApiKey = process.env.EMAIL_API_KEY;
+      const emailApiKeyRaw = process.env.EMAIL_API_KEY || process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY;
+      const emailApiKey = String(emailApiKeyRaw || '').trim().replace(/^\s+|\s+$/g, '').replace(/^['"`]|['"`]$/g, '');
       const emailDomain = process.env.EMAIL_DOMAIN;
       const fromAddr = process.env.SMTP_FROM || 'satasyst3m@gmail.com';
       const fromName = process.env.SMTP_FROM_NAME || 'SATA Sistema';
