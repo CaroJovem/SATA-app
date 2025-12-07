@@ -483,9 +483,12 @@ class AuthController {
       }
 
       const hash = await bcrypt.hash(new_password, 10);
-      const actorId = req.user?.id ? Number(req.user.id) : Number(payload.id);
-      const ok = await UserRepository.resetPasswordWithProcedure(actorId, Number(payload.id), hash);
-      if (!ok) return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+      const targetId = Number(payload.id);
+      const user = await UserRepository.findById(targetId);
+      if (!user) return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+      const actorId = req.user?.id ? Number(req.user.id) : targetId;
+      const ok = await UserRepository.resetPasswordWithProcedure(actorId, targetId, hash);
+      if (!ok) return res.status(500).json({ success: false, error: 'Não foi possível atualizar a senha' });
       try {
         const { logSecurityEvent } = require('../utils/auditLogger');
         logSecurityEvent({ type: 'password_reset', entity: 'user', entityId: payload.id, actor: { id: payload.id, username: payload.username }, details: { via: 'token' } });
