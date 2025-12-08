@@ -55,6 +55,8 @@ class QuartoController {
     async getById(req, res) {
         try {
             const { id } = req.params;
+            const [qRows] = await db.execute('SELECT id, numero, capacidade, descricao, status FROM quartos WHERE id = ?', [id]);
+            const qInfo = Array.isArray(qRows) && qRows[0] ? qRows[0] : null;
             const quarto = await QuartoRepository.findById(id);
             
             if (!quarto) {
@@ -171,8 +173,17 @@ class QuartoController {
                 });
             }
 
+            // Histórico será preservado com FK ON DELETE SET NULL em internacoes
+
             // Prosseguir com a exclusão
             await QuartoRepository.delete(id);
+
+            try {
+                const { logDeletion } = require('../utils/auditLogger');
+                const actor = req.user ? { id: req.user.id, username: req.user.username, role: req.user.role } : null;
+                const details = qInfo ? { numero: qInfo.numero, capacidade: qInfo.capacidade, descricao: qInfo.descricao } : {};
+                logDeletion({ entity: 'quarto', entityId: Number(id), actor, details });
+            } catch {}
 
             return res.json({
                 success: true,

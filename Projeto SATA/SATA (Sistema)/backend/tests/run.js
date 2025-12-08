@@ -2,6 +2,10 @@ async function main() {
   const tests = [
     require('./security.reset.test'),
     require('./security.access.test'),
+    require('./rooms.delete.validation.test'),
+    require('./rooms.delete.history.preserve.test'),
+    require('./donors.create.validation.test'),
+    require('./donations.tojson.test'),
   ];
   for (const t of tests) {
     await t();

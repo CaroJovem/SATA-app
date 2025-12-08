@@ -25,7 +25,7 @@ function FormAlimentos({ onSave }) {
     doacao: {
       item: "",
       qntd: 0,
-      unidade_medida: "Unidade",
+      unidade_medida: "Unidade(s)",
       validade: ""
     }
   });

@@ -100,7 +100,7 @@ class Doacao {
             obs: this.obs,
             actor: this.actor,
             idosoId: this.idosoId,
-            idoso: this.idoso,
+            idoso: (this.idoso && typeof this.idoso === 'object') ? (this.idoso.nome || '') : (this.idoso || ''),
             doador: this.doador.toJSON(),
             eventoId: this.eventoId,
             evento: this.eventoTitulo,

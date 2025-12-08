@@ -591,6 +591,35 @@ async function ensureIntegrity() {
     } catch (e) {
       errors.push({ action: 'internacoes.ensure_fk_idoso_check', error: e.message });
     }
+
+    // Ajustar internacoes -> quartos para ON DELETE SET NULL (preserva histórico ao excluir quarto)
+    try {
+      const [fkqRows] = await conn.query(
+        `SELECT rc.DELETE_RULE
+         FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+         WHERE rc.CONSTRAINT_SCHEMA=? AND rc.CONSTRAINT_NAME='fk_quarto' AND rc.TABLE_NAME='internacoes'`,
+        [DB_NAME]
+      );
+      const qDeleteRule = String(fkqRows?.[0]?.DELETE_RULE || '').toUpperCase();
+      if (qDeleteRule !== 'SET NULL') {
+        try {
+          await conn.query('ALTER TABLE `internacoes` DROP FOREIGN KEY `fk_quarto`');
+          changes.push('internacoes.drop_fk_quarto');
+        } catch (e) {
+          errors.push({ action: 'internacoes.drop_fk_quarto', error: e.message });
+        }
+        try {
+          await conn.query(
+            'ALTER TABLE `internacoes` ADD CONSTRAINT `fk_quarto` FOREIGN KEY (`quarto_id`) REFERENCES `quartos`(`id`) ON DELETE SET NULL ON UPDATE CASCADE'
+          );
+          changes.push('internacoes.fk_quarto_on_delete_set_null');
+        } catch (e) {
+          errors.push({ action: 'internacoes.add_fk_quarto_set_null', error: e.message });
+        }
+      }
+    } catch (e) {
+      errors.push({ action: 'internacoes.ensure_fk_quarto_check', error: e.message });
+    }
   } finally {
     conn.release();
   }

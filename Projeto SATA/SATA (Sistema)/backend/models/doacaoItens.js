@@ -16,6 +16,10 @@ class DoacaoItens {
     if (!this.quantidade || Number(this.quantidade) <= 0) {
       errors.push('Quantidade inválida');
     }
+    const allowedUnits = ['Unidade(s)', 'Kg', 'L', 'Caixa', 'Pacote', 'Metro', 'Outro'];
+    if (this.unidade_medida && !allowedUnits.includes(String(this.unidade_medida))) {
+      errors.push('Unidade de medida inválida');
+    }
     return errors;
   }
 

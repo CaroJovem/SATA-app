@@ -50,6 +50,10 @@ class DoadorController {
                 cpf: normalizeDocOrNull(req.body?.cpf),
                 cnpj: normalizeDocOrNull(req.body?.cnpj)
             };
+            const email = String(body.email || '').trim();
+            if (email && !/^.+@.+\..+$/.test(email)) {
+                return res.status(400).json({ success: false, message: 'Email inválido' });
+            }
             const doador = new Doador(body);
             const errors = doador.validate();
             if (errors.length > 0) {
@@ -59,17 +63,28 @@ class DoadorController {
                     errors
                 })
             }
-            const newDoador = await DoadorRepository.create(doador)
+            let newDoador;
+            try {
+                newDoador = await DoadorRepository.create(doador)
+            } catch (e) {
+                const msg = String(e?.message || '');
+                const dup = /duplicate entry|ER_DUP_ENTRY/i.test(msg);
+                if (dup) {
+                    return res.status(409).json({ success: false, message: 'CPF/CNPJ já cadastrado' });
+                }
+                throw e;
+            }
             res.status(201).json({
                 success: true,
                 data: newDoador.toJSON(),
                 message: "Doador gravado com sucesso"
             })
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: error.message
-            })
+            const msg = String(error?.message || '');
+            if (/cpf|cnpj/i.test(msg) && /inválido|invalido/i.test(msg)) {
+                return res.status(400).json({ success: false, message: 'Documento inválido' });
+            }
+            res.status(500).json({ success: false, message: error.message })
         }
     }
 
@@ -111,6 +126,10 @@ class DoadorController {
                 cpf: normalizeDocOrNull(req.body?.cpf),
                 cnpj: normalizeDocOrNull(req.body?.cnpj)
             };
+            const email = String(body.email || '').trim();
+            if (email && !/^.+@.+\..+$/.test(email)) {
+                return res.status(400).json({ success: false, message: 'Email inválido' });
+            }
             const doador = new Doador({ ...body, id })
             const errors = doador.validate();
             if (errors.length > 0) {
@@ -120,7 +139,17 @@ class DoadorController {
                     errors
                 })
             }
-            const doadorAtualizado = await DoadorRepository.update(id, doador);
+            let doadorAtualizado;
+            try {
+                doadorAtualizado = await DoadorRepository.update(id, doador);
+            } catch (e) {
+                const msg = String(e?.message || '');
+                const dup = /duplicate entry|ER_DUP_ENTRY/i.test(msg);
+                if (dup) {
+                    return res.status(409).json({ success: false, message: 'CPF/CNPJ já cadastrado' });
+                }
+                throw e;
+            }
             return res.json({
                 success: true,
                 data: doadorAtualizado.toJSON(),

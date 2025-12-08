@@ -432,19 +432,29 @@ async updateStatus(req, res) {
                 return res.status(409).json({ success: false, message: 'Não é possível excluir: existe internação ativa para este idoso.' });
             }
 
-            // Conta internações totais (para log)
+            // Preservar histórico associado
             const [totRows] = await conn.execute('SELECT COUNT(*) AS cnt FROM internacoes WHERE idoso_id = ?', [id]);
             const totalInternacoes = Array.isArray(totRows) && totRows[0] ? Number(totRows[0].cnt) : 0;
+            if (totalInternacoes > 0) {
+                conn.release();
+                return res.status(409).json({ success: false, message: 'Não é possível excluir: há histórico de internações para este idoso.' });
+            }
+            const [totObs] = await conn.execute('SELECT COUNT(*) AS cnt FROM observacoes_idosos WHERE idoso_id = ?', [id]);
+            const totalObservacoes = Array.isArray(totObs) && totObs[0] ? Number(totObs[0].cnt) : 0;
+            if (totalObservacoes > 0) {
+                conn.release();
+                return res.status(409).json({ success: false, message: 'Não é possível excluir: há observações registradas para este idoso.' });
+            }
+            const [totDoa] = await conn.execute('SELECT COUNT(*) AS cnt FROM doacoes WHERE idoso_id = ?', [id]);
+            const totalDoacoes = Array.isArray(totDoa) && totDoa[0] ? Number(totDoa[0].cnt) : 0;
+            if (totalDoacoes > 0) {
+                conn.release();
+                return res.status(409).json({ success: false, message: 'Não é possível excluir: há doações vinculadas a este idoso.' });
+            }
 
             await conn.beginTransaction();
 
-            // Remove todas internações (finalizadas ou quaisquer) do idoso
-            await conn.execute('DELETE FROM internacoes WHERE idoso_id = ?', [id]);
-
-            // Desvincula doações do idoso (proteger dados: remove nome textual também)
-            await conn.execute('UPDATE doacoes SET idoso_id = NULL, idoso = NULL WHERE idoso_id = ?', [id]);
-
-            await conn.execute('DELETE FROM observacoes_idosos WHERE idoso_id = ?', [id]);
+            // Sem remoção de históricos vinculados
 
             // Deleta o idoso
             const [delRes] = await conn.execute('DELETE FROM idosos WHERE id = ?', [id]);
@@ -474,7 +484,7 @@ async updateStatus(req, res) {
             try {
                 const { logDeletion } = require('../utils/auditLogger');
                 const actor = req.user ? { id: req.user.id, username: req.user.username, role: req.user.role } : null;
-                logDeletion({ entity: 'idoso', entityId: Number(id), actor, details: { internacoesRemovidas: totalInternacoes } });
+                logDeletion({ entity: 'idoso', entityId: Number(id), actor, details: { motivo: 'exclusão sem registros relacionados' } });
             } catch {}
 
             if (ok) {
