@@ -100,18 +100,7 @@ class Notificacao {
     });
   }
 
-  static criarNotificacaoEventoProximo(evento, dias_restantes, usuario_id = null) {
-    const prioridade = dias_restantes <= 1 ? 'alta' : dias_restantes <= 3 ? 'normal' : 'baixa';
-    return new Notificacao({
-      tipo: 'evento_proximo',
-      titulo: 'Evento se aproximando',
-      descricao: `${evento.nome} acontecerá em ${dias_restantes} ${dias_restantes === 1 ? 'dia' : 'dias'}`,
-      prioridade: prioridade,
-      usuario_id: usuario_id,
-      referencia_id: evento.id,
-      referencia_tipo: 'evento'
-    });
-  }
+  // Removido: criação de notificações de eventos próximos
 }
 
 module.exports = Notificacao;

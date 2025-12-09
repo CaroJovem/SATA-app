@@ -183,7 +183,6 @@ const Notificacoes = () => {
       case 'cadastro': return '👤';
       case 'estoque_baixo': return '📦';
       case 'transacao_financeira': return '💰';
-      case 'evento_proximo': return '📅';
       default: return '🔔';
     }
   };
@@ -193,7 +192,6 @@ const Notificacoes = () => {
       case 'cadastro': return 'Cadastro';
       case 'estoque_baixo': return 'Estoque Baixo';
       case 'transacao_financeira': return 'Transação';
-      case 'evento_proximo': return 'Evento';
       default: return tipo;
     }
   };
@@ -252,7 +250,6 @@ const Notificacoes = () => {
                     <option value="cadastro">Cadastro</option>
                     <option value="estoque_baixo">Estoque Baixo</option>
                     <option value="transacao_financeira">Transação</option>
-                    <option value="evento_proximo">Evento</option>
                   </Form.Select>
                 </Form.Group>
               </Col>

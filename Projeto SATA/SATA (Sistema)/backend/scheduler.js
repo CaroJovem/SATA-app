@@ -1,12 +1,8 @@
 const cron = require('node-cron');
-const eventoController = require('./controllers/eventoController');
 const ProdutoRepository = require('./repository/produtoRepository');
 const db = require('./config/database');
 
-// Agenda a verificação de eventos próximos a cada 30 minutos
-cron.schedule('*/30 * * * *', () => {
-  try { eventoController.verificarEventosProximos(); } catch (_) {}
-});
+// Verificação de eventos próximos removida
 
 cron.schedule('*/10 * * * *', () => {
   try { ProdutoRepository.checkAndNotifyLowStock(); } catch (_) {}
@@ -23,3 +19,13 @@ cron.schedule('* * * * *', async () => {
     )`);
   } catch (_) {}
 });
+
+// Limpeza imediata de preferências de notificação de eventos e notificações de eventos
+(async () => {
+  try {
+    await db.execute(`UPDATE eventos SET notificar = 0, tempo_notificacao = 0`);
+  } catch (_) {}
+  try {
+    await db.execute(`DELETE FROM notificacoes WHERE tipo = 'evento_proximo'`);
+  } catch (_) {}
+})();

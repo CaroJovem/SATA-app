@@ -44,8 +44,8 @@ class EventoRepository {
         throw new Error(errors.join(', '));
       }
       const [result] = await db.execute(
-        `INSERT INTO eventos (titulo, tipo, cor, data_inicio, data_fim, hora_inicio, hora_fim, local, descricao, notificar, tempo_notificacao)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO eventos (titulo, tipo, cor, data_inicio, data_fim, hora_inicio, hora_fim, local, descricao)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           evento.titulo,
           evento.tipo,
@@ -56,8 +56,6 @@ class EventoRepository {
           evento.horaFim,
           evento.local,
           evento.descricao,
-          evento.notificar ? 1 : 0,
-          evento.tempoNotificacao,
         ],
       );
       const insertedId = result.insertId;
@@ -76,7 +74,7 @@ class EventoRepository {
         throw new Error(errors.join(', '));
       }
       const [result] = await db.execute(
-        `UPDATE eventos SET titulo = ?, tipo = ?, cor = ?, data_inicio = ?, data_fim = ?, hora_inicio = ?, hora_fim = ?, local = ?, descricao = ?, notificar = ?, tempo_notificacao = ?
+        `UPDATE eventos SET titulo = ?, tipo = ?, cor = ?, data_inicio = ?, data_fim = ?, hora_inicio = ?, hora_fim = ?, local = ?, descricao = ?
          WHERE id = ?`,
         [
           evento.titulo,
@@ -88,8 +86,6 @@ class EventoRepository {
           evento.horaFim,
           evento.local,
           evento.descricao,
-          evento.notificar ? 1 : 0,
-          evento.tempoNotificacao,
           id,
         ],
       );
@@ -113,18 +109,7 @@ class EventoRepository {
     }
   }
 
-  async findUpcomingEvents(minutos) {
-    try {
-      const [rows] = await db.execute(
-        `SELECT * FROM eventos WHERE notificar = 1 AND data_inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL ? MINUTE)`,
-        [minutos]
-      );
-      return (rows || []).map((r) => new Evento(r));
-    } catch (err) {
-      console.error('Erro ao buscar eventos próximos (findUpcomingEvents):', err.message);
-      return [];
-    }
-  }
+  // Notificações de eventos removidas do sistema
 
   async getDonationsByEventoId(eventoId, { tipo = 'todos', data = 'todos', destinatario = 'todos', busca = '' } = {}) {
     const list = await doacaoRepository.findByEventoId(eventoId, { tipo, data, destinatario, busca });

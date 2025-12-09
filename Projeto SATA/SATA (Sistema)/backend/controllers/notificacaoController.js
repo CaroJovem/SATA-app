@@ -3,10 +3,10 @@ const NotificacaoRepository = require('../repository/notificacaoRepository');
 
 function normalizeTipo(tipo) {
   const t = String(tipo || '').toLowerCase();
-  if (t === 'evento') return 'evento_proximo';
   if (t === 'estoque') return 'estoque_baixo';
   if (t === 'financeiro') return 'transacao_financeira';
-  return ['cadastro','estoque_baixo','transacao_financeira','evento_proximo'].includes(t) ? t : 'cadastro';
+  // Removido suporte a notificações de eventos
+  return ['cadastro','estoque_baixo','transacao_financeira'].includes(t) ? t : 'cadastro';
 }
 
 class NotificacaoController {
@@ -171,11 +171,11 @@ class NotificacaoController {
 
 async function criarNotificacao(data) {
   const tipo = normalizeTipo(data.tipo);
-  const titulo = data.titulo || (tipo === 'estoque_baixo' ? 'Estoque baixo' : tipo === 'transacao_financeira' ? 'Transação financeira' : tipo === 'evento_proximo' ? 'Evento' : 'Cadastro');
+  const titulo = data.titulo || (tipo === 'estoque_baixo' ? 'Estoque baixo' : tipo === 'transacao_financeira' ? 'Transação financeira' : 'Cadastro');
   const descricao = data.mensagem || data.descricao || '';
   const usuario_id = data.id_usuario || data.usuario_id || null;
   const referencia_id = data.referencia_id || null;
-  const referencia_tipo = data.referencia_tipo || (tipo === 'estoque_baixo' ? 'produto' : tipo === 'evento_proximo' ? 'evento' : tipo === 'transacao_financeira' ? 'financeiro' : null);
+  const referencia_tipo = data.referencia_tipo || (tipo === 'estoque_baixo' ? 'produto' : tipo === 'transacao_financeira' ? 'financeiro' : null);
   const prioridade = data.prioridade || 'normal';
   const now = new Date();
   const twoMinAgo = new Date(now.getTime() - 2 * 60 * 1000);

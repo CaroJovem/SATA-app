@@ -39,8 +39,6 @@ export default function Eventos() {
     horaFim: '',
     local: '',
     descricao: '',
-    notificar: false,
-    tempoNotificacao: 1440,
   });
 
   // Filtros
@@ -373,8 +371,6 @@ export default function Eventos() {
       horaFim: props.horaFim || '',
       local: props.local || '',
       descricao: props.descricao || '',
-      notificar: !!props.notificar,
-      tempoNotificacao: props.tempoNotificacao || 1440,
     });
     setShowModal(true);
   }
@@ -415,7 +411,7 @@ export default function Eventos() {
 
   function limparForm() {
     setFormData({
-      titulo: '', tipo: 'Geral', cor: '#3788d8', dataInicio: '', dataFim: '', horaInicio: '', horaFim: '', local: '', descricao: '', notificar: false, tempoNotificacao: 1440
+      titulo: '', tipo: 'Geral', cor: '#3788d8', dataInicio: '', dataFim: '', horaInicio: '', horaFim: '', local: '', descricao: ''
     });
   }
 
@@ -900,31 +896,7 @@ export default function Eventos() {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>Notificar</Form.Label>
-                    <div className="d-flex align-items-center gap-2">
-                      <Form.Check
-                        type="switch"
-                        id="notificar-switch"
-                        checked={formData.notificar}
-                        onChange={e => setFormData({ ...formData, notificar: e.target.checked })}
-                        label={formData.notificar ? 'Ativo' : 'Inativo'}
-                      />
-                      {formData.notificar && (
-                        <Form.Select
-                          style={{ maxWidth: 200 }}
-                          value={formData.tempoNotificacao}
-                          onChange={e => setFormData({ ...formData, tempoNotificacao: Number(e.target.value) })}
-                        >
-                          <option value={43200}>30 dias antes</option>
-                          <option value={10080}>7 dias antes</option>
-                          <option value={1440}>1 dia antes</option>
-                        </Form.Select>
-                      )}
-                    </div>
-                  </Form.Group>
-                </Col>
+                {/* Removido: configuração de notificações de eventos */}
 
                 <Col md={12}>
                   <Form.Group>

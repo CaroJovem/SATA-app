@@ -59,8 +59,6 @@ class Evento {
     this.horaFim = data.horaFim ?? data.hora_fim ?? null;
     this.local = data.local ?? null;
     this.descricao = data.descricao ?? null;
-    this.notificar = data.notificar != null ? Number(data.notificar) === 1 || data.notificar === true : false;
-    this.tempoNotificacao = data.tempoNotificacao != null ? Number(data.tempoNotificacao) : (data.tempo_notificacao != null ? Number(data.tempo_notificacao) : null);
   }
 
   validate() {
@@ -83,8 +81,6 @@ class Evento {
       horaFim: normalizeTime(this.horaFim),
       local: this.local,
       descricao: this.descricao,
-      notificar: !!this.notificar,
-      tempoNotificacao: this.tempoNotificacao,
     };
   }
 }
