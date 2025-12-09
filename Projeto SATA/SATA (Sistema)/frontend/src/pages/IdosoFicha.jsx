@@ -185,8 +185,6 @@ export default function IdosoFicha() {
                 <tr><th>Data de nascimento</th><td>{formatDate(dadosPessoais?.dataNascimento)}</td></tr>
                 <tr><th>Idade</th><td>{dadosPessoais?.idade ?? '—'}</td></tr>
                 <tr><th>Telefone</th><td>{dadosPessoais?.contatos?.telefone ?? '—'}</td></tr>
-                <tr><th>E-mail</th><td>{dadosPessoais?.contatos?.email ?? '—'}</td></tr>
-                <tr><th>Responsável</th><td>{dadosPessoais?.contatos?.responsavel ?? '—'}</td></tr>
                 <tr><th>RG</th><td>{dadosPessoais?.documentos?.rg ?? '—'}</td></tr>
                 <tr><th>CPF</th><td>{dadosPessoais?.documentos?.cpf ?? '—'}</td></tr>
                 <tr><th>Cartão SUS</th><td>{dadosPessoais?.documentos?.cartaoSus ?? '—'}</td></tr>
