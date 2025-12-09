@@ -1,3 +1,4 @@
+// Modelo de notificação com validação e fábricas
 class Notificacao {
   constructor(data = {}) {
     this.id = data.id || null;
@@ -15,6 +16,7 @@ class Notificacao {
     this.updated_at = data.updated_at || null;
   }
 
+  // Valida tipo, título, descrição, prioridade e referência
   validate() {
     const errors = [];
     const tiposValidos = ['cadastro', 'estoque_baixo', 'transacao_financeira', 'evento_proximo'];
@@ -44,6 +46,7 @@ class Notificacao {
     return errors;
   }
 
+  // Serializa notificação para resposta
   toJSON() {
     return {
       id: this.id,
@@ -63,6 +66,7 @@ class Notificacao {
   }
 
   // Método estático para criar notificações específicas
+  // Fábrica: notificação de cadastro
   static criarNotificacaoCadastro(tipo_cadastro, nome_item, usuario_id = null) {
     return new Notificacao({
       tipo: 'cadastro',
@@ -74,6 +78,7 @@ class Notificacao {
     });
   }
 
+  // Fábrica: notificação de estoque baixo
   static criarNotificacaoEstoqueBaixo(produto, usuario_id = null) {
     const prioridade = produto.estoque_atual === 0 ? 'critica' : 'alta';
     return new Notificacao({
@@ -87,6 +92,7 @@ class Notificacao {
     });
   }
 
+  // Fábrica: notificação de transação financeira
   static criarNotificacaoTransacaoFinanceira(transacao, usuario_id = null) {
     const tipo_transacao = transacao.tipo || (transacao.valor > 0 ? 'entrada' : 'saída');
     return new Notificacao({
@@ -104,7 +110,3 @@ class Notificacao {
 }
 
 module.exports = Notificacao;
-/*
-  Modelo Notificação
-  - Representa alertas e status de leitura por usuário.
-*/

@@ -1,3 +1,4 @@
+// Rotas de produtos: CRUD e histórico de movimentações
 const express = require('express');
 const router = express.Router();
 const ProdutoController = require('../controllers/produtoController');
@@ -12,8 +13,3 @@ router.post('/:id/movimentar', (req, res) => produtoController.movimentar(req, r
 router.get('/:id/historico', (req, res) => produtoController.historico(req, res));
 
 module.exports = router;
-/*
-  Rotas de Produtos
-  - Endpoints para CRUD de produtos e movimentações de estoque.
-  - Prefixo: `/api/produtos`.
-*/

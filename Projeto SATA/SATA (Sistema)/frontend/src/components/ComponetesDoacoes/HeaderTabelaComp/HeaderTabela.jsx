@@ -1,3 +1,4 @@
+// Cabeçalho da tabela de doações
 import { Button } from "react-bootstrap";
 import { BiPlusCircle } from "react-icons/bi";
 import { GiftFill } from "react-bootstrap-icons";

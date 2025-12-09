@@ -1,6 +1,8 @@
+// Serviço auxiliar de eventos: reutiliza eventosService
 import eventosService from './eventosService';
 
 export default {
+  // Lista todos os eventos
   async getAll() {
     try {
       const lista = await eventosService.getAll();
@@ -10,6 +12,7 @@ export default {
       return [];
     }
   },
+  // Cria evento e retorna lista atualizada
   async create(payload) {
     try {
       await eventosService.create(payload);
@@ -19,6 +22,7 @@ export default {
       throw err;
     }
   },
+  // Atualiza evento e retorna lista atualizada
   async update(id, payload) {
     try {
       await eventosService.update(id, payload);
@@ -28,6 +32,7 @@ export default {
       throw err;
     }
   },
+  // Remove evento e retorna lista atualizada
   async remove(id) {
     try {
       await eventosService.remove(id);
@@ -38,6 +43,7 @@ export default {
     }
   }
   ,
+  // Busca evento por ID
   async getById(id) {
     try {
       const ev = await eventosService.getById(id);
@@ -48,7 +54,3 @@ export default {
     }
   }
 };
-/*
-  Serviço de Evento
-  - CRUD de eventos e filtros por intervalo.
-*/

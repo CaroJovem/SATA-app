@@ -1,9 +1,9 @@
+// Campo de busca de Evento com dropdown
 import { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import eventosService from "../../../services/eventosService";
 
-// Componente de busca dinâmica inspirado no SearchSelect
-// Mantém estrutura/lógica e adapta para eventos (campo opcional)
+// Campo opcional com busca dinâmica de eventos
 function SelectEvento({ setEvento, setEventoId, setErrors, setValidated, errors, selectedEventoEdit = "", errorKey = "evento" }) {
   const [listaEventos, setListaEventos] = useState([]);
 

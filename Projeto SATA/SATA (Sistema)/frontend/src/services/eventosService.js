@@ -1,6 +1,8 @@
+// Serviço de eventos: lista, busca, cria, atualiza e remove
 import api from './api';
 
 const eventosService = {
+  // Lista todos os eventos
   async getAll() {
     try {
       const res = await api.get('/eventos');
@@ -13,6 +15,7 @@ const eventosService = {
     }
   },
 
+  // Busca eventos pelo título
   async searchByTitulo(titulo = '') {
     try {
       const res = await api.get('/eventos/buscar', { params: { titulo } });
@@ -25,6 +28,7 @@ const eventosService = {
     }
   },
 
+  // Busca evento por ID
   async getById(id) {
     try {
       const res = await api.get(`/eventos/${id}`);
@@ -37,6 +41,7 @@ const eventosService = {
     }
   },
 
+  // Cria novo evento
   async create(payload) {
     try {
       const res = await api.post('/eventos', payload);
@@ -50,6 +55,7 @@ const eventosService = {
     }
   },
 
+  // Atualiza um evento
   async update(id, payload) {
     try {
       const res = await api.put(`/eventos/${id}`, payload);
@@ -63,6 +69,7 @@ const eventosService = {
     }
   },
 
+  // Remove um evento
   async remove(id) {
     try {
       const res = await api.delete(`/eventos/${id}`);
@@ -78,7 +85,3 @@ const eventosService = {
 };
 
 export default eventosService;
-/*
-  Serviço de Eventos (coleção)
-  - Listagem e utilitários para eventos.
-*/

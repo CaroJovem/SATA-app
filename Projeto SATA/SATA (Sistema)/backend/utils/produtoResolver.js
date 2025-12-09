@@ -1,6 +1,7 @@
+// Utilitários para resolver/criar produtos
 const audit = require('../utils/auditLogger');
 
-// Normaliza nomes para comparação: trim e lower-case
+// Normaliza nome para comparação (trim e minúsculas)
 function normalizeName(nome) {
   if (typeof nome !== 'string') return '';
   return nome.trim().toLowerCase();
@@ -142,7 +143,3 @@ async function upsertProdutoFast(conn, { nome, categoria, unidade }) {
 }
 
 module.exports = { resolveProduto, normalizeName, upsertProdutoFast };
-/*
-  Resolver de Produto
-  - Funções auxiliares para normalização e validações de produtos.
-*/

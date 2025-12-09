@@ -1,9 +1,4 @@
-/*
-  Middleware de Autenticação e Autorização
-  - `authenticate`: valida `JWT` obtido de cookie httpOnly ou header Bearer.
-  - `authorizeRoles`: restringe acesso a papéis específicos.
-  - `roleAccessControl`: leitura liberada; escrita somente para Admin.
-*/
+// Middleware de autenticação e autorização
 const jwt = require('jsonwebtoken');
 
 const normalizeRole = (role) => {
@@ -15,6 +10,7 @@ const normalizeRole = (role) => {
   return 'Funcionário';
 };
 
+// Autentica via cookie httpOnly ou header Bearer
 function authenticate(req, res, next) {
   if (req.method === 'OPTIONS') return next();
   // Prioriza cookie httpOnly; aceita Bearer como fallback
@@ -38,6 +34,7 @@ function authenticate(req, res, next) {
   }
 }
 
+// Autoriza acesso por papel
 function authorizeRoles(...roles) {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ success: false, error: 'Não autenticado' });
@@ -50,6 +47,7 @@ function authorizeRoles(...roles) {
   };
 }
 
+// Regras de acesso: leitura aberta, escrita restrita
 function roleAccessControl(req, res, next) {
   const fullPath = `${req.baseUrl || ''}${req.path || ''}`;
   const allowedReadPosts = ['/api/doacoes/filtrar', '/api/doadores/filtrar'];

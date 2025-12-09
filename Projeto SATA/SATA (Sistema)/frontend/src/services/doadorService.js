@@ -1,7 +1,9 @@
+// Serviço de doadores: buscar por ID e ficha
 import api from './api';
 
 const resource = '/doadores';
 
+// Busca doador por ID
 const getById = async (id) => {
   try {
     const { data } = await api.get(`${resource}/${id}`);
@@ -13,6 +15,7 @@ const getById = async (id) => {
   }
 };
 
+// Busca ficha completa do doador
 const getFicha = async (id) => {
   try {
     const { data } = await api.get(`${resource}/${id}/ficha`);
@@ -30,7 +33,3 @@ const doadorService = {
 };
 
 export default doadorService;
-/*
-  Serviço de Doadores
-  - Operações de CRUD e busca de doadores.
-*/

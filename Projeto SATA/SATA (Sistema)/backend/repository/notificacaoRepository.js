@@ -1,7 +1,9 @@
+// Repositório de notificações: CRUD, contagem e consultas recentes
 const db = require('../config/database');
 
 const sortableFields = new Set(['data_criacao', 'prioridade', 'tipo', 'titulo']);
 
+// Mantém a tabela com no máximo N registros mais recentes
 async function enforceLimit(conn, table = 'notificacoes', limit = 20) {
   const sql = `DELETE FROM ${table} WHERE id NOT IN (
     SELECT id FROM (
@@ -12,6 +14,7 @@ async function enforceLimit(conn, table = 'notificacoes', limit = 20) {
 }
 
 const NotificacaoRepository = {
+  // Insere uma notificação e evita duplicadas em curto intervalo
   async create(notificacao) {
     const conn = await db.getConnection();
     try {
@@ -52,6 +55,7 @@ const NotificacaoRepository = {
     }
   },
 
+  // Atualiza campos de uma notificação
   async update(id, notificacao) {
     const sql = `UPDATE notificacoes SET tipo=?, titulo=?, descricao=?, prioridade=?, lida=?, usuario_id=?, referencia_id=?, referencia_tipo=? WHERE id=?`;
     const params = [
@@ -69,12 +73,14 @@ const NotificacaoRepository = {
     return result.affectedRows > 0;
   },
 
+  // Marca notificação como lida
   async marcarComoLida(id) {
     const sql = `UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE id = ?`;
     const [result] = await db.execute(sql, [id]);
     return result.affectedRows > 0;
   },
 
+  // Marca várias notificações como lidas
   async marcarVariasComoLidas(ids) {
     if (!ids || ids.length === 0) return false;
     const placeholders = ids.map(() => '?').join(',');
@@ -83,11 +89,13 @@ const NotificacaoRepository = {
     return result.affectedRows > 0;
   },
 
+  // Exclui uma notificação
   async delete(id) {
     const [result] = await db.execute('DELETE FROM notificacoes WHERE id=?', [id]);
     return result.affectedRows > 0;
   },
 
+  // Exclui várias notificações
   async deleteMany(ids) {
     if (!ids || ids.length === 0) return false;
     const placeholders = ids.map(() => '?').join(',');
@@ -96,11 +104,13 @@ const NotificacaoRepository = {
     return result.affectedRows > 0;
   },
 
+  // Busca notificação por ID
   async findById(id) {
     const [rows] = await db.execute('SELECT * FROM notificacoes WHERE id=?', [id]);
     return rows[0] || null;
   },
 
+  // Lista notificações com filtros, ordenação e paginação
   async findAll(filters = {}) {
     let sql = 'SELECT * FROM notificacoes WHERE 1=1';
     const params = [];
@@ -173,6 +183,7 @@ const NotificacaoRepository = {
     return rows;
   },
 
+  // Conta notificações considerando filtros
   async countAll(filters = {}) {
     let sql = 'SELECT COUNT(*) as total FROM notificacoes WHERE 1=1';
     const params = [];
@@ -223,6 +234,7 @@ const NotificacaoRepository = {
     return rows[0].total;
   },
 
+  // Conta notificações não lidas (opcional por usuário)
   async countNaoLidas(usuario_id = null) {
     let sql = 'SELECT COUNT(*) as total FROM notificacoes WHERE lida = 0';
     const params = [];
@@ -236,6 +248,7 @@ const NotificacaoRepository = {
     return rows[0].total;
   },
 
+  // Lista notificações recentes limitadas
   async findRecentes(limite = 10, usuario_id = null) {
     let sql = 'SELECT * FROM notificacoes WHERE 1=1';
     const params = [];

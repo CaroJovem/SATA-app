@@ -1,3 +1,4 @@
+// Modelo de quarto: número, capacidade, status
 class Quarto {
   constructor(data) {
     this.id = data.id !== undefined && data.id !== null ? parseInt(data.id) : null;
@@ -9,6 +10,7 @@ class Quarto {
     this.data_atualizacao = data.data_atualizacao || null;
   }
 
+  // Valida número, capacidade e status
   validate() {
     const errors = [];
 
@@ -28,6 +30,7 @@ class Quarto {
     return errors;
   }
 
+  // Serializa quarto para resposta
   toJSON() {
     return {
       id: this.id,
@@ -42,7 +45,3 @@ class Quarto {
 }
 
 module.exports = Quarto;
-/*
-  Modelo Quartos
-  - Estrutura para unidades de quarto e capacidade/ocupação.
-*/

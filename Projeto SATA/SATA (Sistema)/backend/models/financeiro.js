@@ -1,3 +1,4 @@
+// Modelo financeiro: validação de lançamento e serialização
 class Financeiro {
   constructor(data = {}) {
     this.id = data.id ?? null;
@@ -18,6 +19,7 @@ class Financeiro {
       : (this.recorrente ? 1 : null);
   }
 
+  // Valida campos do lançamento financeiro
   validate() {
     const errors = [];
     if (!this.descricao || String(this.descricao).trim().length === 0) {
@@ -55,6 +57,7 @@ class Financeiro {
     return errors;
   }
 
+  // Serializa lançamento para resposta
   toJSON() {
     return {
       id: this.id,
@@ -75,7 +78,3 @@ class Financeiro {
 }
 
 module.exports = Financeiro;
-/*
-  Modelo Financeiro
-  - Lançamentos de entradas/saídas e metadados de registro.
-*/

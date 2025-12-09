@@ -1,3 +1,4 @@
+// Repositório de produtos: CRUD, ajustes e movimentações de estoque
 const db = require('../config/database');
 const MovimentoEstoqueRepository = require('./movimentoEstoqueRepository');
 
@@ -201,7 +202,3 @@ const ProdutoRepository = {
 };
 
 module.exports = ProdutoRepository;
-/*
-  Repositório de Produtos
-  - Persistência e consultas paginadas de produtos, atualizações e deleções.
-*/

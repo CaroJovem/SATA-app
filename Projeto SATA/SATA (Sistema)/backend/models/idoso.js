@@ -1,5 +1,4 @@
-// Arquivo: idoso.js
-// Descrição: Modelo que representa um idoso no sistema
+// Modelo de idoso: campos, validações e utilitários
 
 class Idoso {
   constructor(data) {
@@ -30,7 +29,7 @@ class Idoso {
     this.dataAtualizacao = this.parseDate(data.dataAtualizacao);
   }
 
-  // Valida os dados do idoso
+  // Valida dados do idoso
   validate() {
     const errors = [];
     
@@ -67,13 +66,13 @@ class Idoso {
     return errors;
   }
 
-  // Valida o formato do CPF
+  // Valida formato do CPF (simplificado)
   validarCPF(cpf) {
     cpf = cpf.replace(/[^\d]/g, '');
     return cpf.length === 11 || (cpf.length === 14 && cpf.includes('.') && cpf.includes('-'));
   }
 
-  // Converte string para objeto Date
+  // Converte string para Date
   parseDate(dateValue) {
     if (!dateValue) return null;
     if (dateValue instanceof Date) return dateValue;
@@ -81,7 +80,7 @@ class Idoso {
     return isNaN(parsedDate.getTime()) ? null : parsedDate;
   }
 
-  // Aplica valores padrão para campos do banco de dados
+  // Aplica valores padrão vindos do banco
   applyDatabaseDefaults(data) {
     const defaults = {
       nome: 'Nome não informado',
@@ -105,7 +104,7 @@ class Idoso {
     });
   }
 
-  // Calcula a idade com base na data de nascimento
+  // Calcula idade a partir da data de nascimento
   calcularIdade() {
     const hoje = new Date();
     let idade = hoje.getFullYear() - this.dataNascimento.getFullYear();
@@ -118,7 +117,7 @@ class Idoso {
     return idade;
   }
 
-  // Retorna o endereço completo formatado
+  // Retorna endereço completo formatado
   getEnderecoCompleto() {
     let endereco = `${this.rua}, ${this.numero}`;
     if (this.complemento) {
@@ -133,7 +132,7 @@ class Idoso {
     return this.status === 'internado';
   }
 
-  // Converte o objeto para JSON (usado nas respostas da API)
+  // Serializa idoso para resposta
   toJSON() {
     return {
         id: this.id,
@@ -159,7 +158,3 @@ class Idoso {
 }
 
 module.exports = Idoso;
-/*
-  Modelo Idoso
-  - Estrutura de dados para residentes, com validações.
-*/

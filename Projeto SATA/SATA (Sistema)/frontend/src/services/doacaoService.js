@@ -1,3 +1,4 @@
+// Serviço de doações: registrar, listar, buscar e atualizar
 import api from './api';
 
 const normTipo = (t) => {
@@ -43,6 +44,7 @@ const normalizeDoacao = (d) => {
   };
 };
 
+// Lista todas as doações
 const getAll = async () => {
   try {
     const response = await api.get('/doacoes');
@@ -55,6 +57,7 @@ const getAll = async () => {
   }
 };
 
+// Lista doações usando filtros
 const getByFiltred = async (filtro) => {
   try {
     const response = await api.post('/doacoes/filtrar', filtro);
@@ -74,6 +77,7 @@ const getByFiltred = async (filtro) => {
   }
 };
 
+// Lista doações associadas a um evento
 const getByEvento = async (eventoId, filtro = {}) => {
   try {
     const params = {
@@ -99,6 +103,7 @@ const getByEvento = async (eventoId, filtro = {}) => {
   }
 };
 
+// Busca uma doação por ID
 const getById = async (id) => {
   try {
     const response = await api.get(`/doacoes/${id}`);
@@ -111,6 +116,7 @@ const getById = async (id) => {
   }
 };
 
+// Cadastra uma nova doação
 const add = async (doacao) => {
   try {
     const doacaoData = { ...doacao };
@@ -124,6 +130,7 @@ const add = async (doacao) => {
   }
 };
 
+// Atualiza dados de uma doação
 const update = async (doacao) => {
   try {
     const response = await api.put(`/doacoes/${doacao.id}`, doacao);
@@ -136,6 +143,7 @@ const update = async (doacao) => {
   }
 };
 
+// Remove uma doação
 const remove = async (id) => {
   try {
     const response = await api.delete(`/doacoes/${id}`);
@@ -149,7 +157,7 @@ const remove = async (id) => {
   }
 };
 
-// Busca doadores por nome usando o endpoint de filtro da API de doadores
+// Busca doadores por nome
 const getDoadorByName = async (nome) => {
   try {
     // O backend espera um payload com { filtros: ["termo"] }
@@ -177,7 +185,3 @@ const doacoesService = {
 };
 
 export default doacoesService;
-/*
-  Serviço de Doações
-  - Operações de registro e consulta de doações.
-*/

@@ -1,3 +1,4 @@
+// Cabeçalho padrão de página com título, ícone e ações
 import React from 'react';
 import { Row, Col } from 'react-bootstrap';
 import './ui.css';

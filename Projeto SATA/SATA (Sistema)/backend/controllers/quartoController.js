@@ -1,8 +1,9 @@
+// Controlador de quartos: listar, criar, atualizar e obter disponíveis
 const QuartoRepository = require('../repository/quartoRepository');
 const db = require('../config/database');
 
 class QuartoController {
-    // Obtém todos os quartos
+    // Lista todos os quartos (com opcional busca/status)
     async getAll(req, res) {
         try {
             const { search, status } = req.query;
@@ -25,7 +26,7 @@ class QuartoController {
         }
     }
 
-    // Obtém quartos disponíveis
+    // Lista quartos com vagas disponíveis
     async getDisponiveis(req, res) {
         try {
             const [quartos] = await db.execute(`
@@ -51,7 +52,7 @@ class QuartoController {
         }
     }
 
-    // Obtém um quarto por ID
+    // Busca quarto por ID
     async getById(req, res) {
         try {
             const { id } = req.params;
@@ -116,7 +117,7 @@ class QuartoController {
         }
     }
 
-    // Atualiza um quarto
+    // Atualiza dados de um quarto
     async update(req, res) {
         try {
             const { id } = req.params;

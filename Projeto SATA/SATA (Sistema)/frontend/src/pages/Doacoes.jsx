@@ -1,3 +1,4 @@
+// Página de doações: cadastro e tabela
 import '../App.css'
 import './Doacoes.css'
 import Navbar from '../components/Navbar'

@@ -1,3 +1,4 @@
+// Cabeçalho da tabela de doadores
 import { Button } from "react-bootstrap";
 import { PlusCircle, HeartFill } from "react-bootstrap-icons";
 import "./SataDoadores.css";

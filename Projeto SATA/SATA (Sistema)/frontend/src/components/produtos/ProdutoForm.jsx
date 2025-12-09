@@ -1,3 +1,4 @@
+// Formulário de produto: cadastro e edição
 import { useEffect, useState } from 'react';
 import { categoriasProdutos, unidadesMedidaProdutos, validarProduto, normalizarProdutoPayload } from '../../pages/validacoesProdutos';
 import { Button, Spinner } from 'react-bootstrap';

@@ -1,9 +1,4 @@
-/*
-  Controlador de Autenticação
-  - Responsável por login, logout, consulta de sessão, registro e recuperação/troca de senha.
-  - Emite `JWT` para autenticação e define cookies de sessão e `CSRF`.
-  - Mantém termos técnicos em inglês quando consagrados (ex.: JWT, token).
-*/
+// Controlador de autenticação: login, sessão atual, registro e senhas
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -26,15 +21,7 @@ const normalizeRole = (role) => {
 };
 
 class AuthController {
-  /*
-    Login
-    Parâmetros: `username`, `password` (body)
-    - Valida credenciais contra o repositório e suporta bootstrap de admin padrão via hash seguro.
-    - Emite `JWT` com expiração de 8h e define cookies `auth_token` e `csrf_token`.
-    Respostas:
-    - 200 com `{ success, user, csrf }` em sucesso.
-    - 401 em credenciais inválidas; 500 se faltar `JWT_SECRET` ou erro interno.
-  */
+  // Faz login e retorna dados do usuário com tokens
   async login(req, res) {
     try {
       const { username, password } = req.body;
@@ -126,11 +113,7 @@ class AuthController {
     }
   }
 
-  /*
-    Sessão atual (me)
-    - Requer `req.user` preenchido pelo middleware de autenticação.
-    - Retorna dados básicos do usuário e papel normalizado.
-  */
+  // Retorna o usuário autenticado atual
   async me(req, res) {
     try {
       if (!req.user) return res.status(401).json({ success: false, error: 'Não autenticado' });

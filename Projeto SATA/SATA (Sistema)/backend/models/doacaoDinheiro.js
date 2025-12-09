@@ -1,3 +1,4 @@
+// Submodelo: doação em dinheiro
 class DoacaoDinheiro {
     constructor(data) {
         this.valor = (data?.valor ?? data?.doacao?.valor ?? null);
@@ -5,6 +6,7 @@ class DoacaoDinheiro {
         this.comprovante = (data?.comprovante ?? data?.doacao?.comprovante ?? null);
     }
 
+    // Serializa dados da doação em dinheiro
     toJSON() {
         return {
             valor: this.valor,
@@ -14,7 +16,3 @@ class DoacaoDinheiro {
     }
 }
 module.exports = DoacaoDinheiro
-/*
-  Modelo Doação em Dinheiro
-  - Valores monetários e finalidade.
-*/

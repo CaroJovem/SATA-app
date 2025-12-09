@@ -1,3 +1,4 @@
+// Página de gestão de internações de idosos
 import React, { useState, useEffect } from 'react';
 import { 
   Container, 
@@ -47,18 +48,15 @@ const SataInternacoes = () => {
   const [carregando, setCarregando] = useState(true);
   const [erroCarregamento, setErroCarregamento] = useState(null);
   
-  // Estados para filtros e busca
   const [filtroStatus, setFiltroStatus] = useState('ativas');
   const [termoBusca, setTermoBusca] = useState('');
   
-  // Estados para modal de nova internação
   const [mostrarModalNova, setMostrarModalNova] = useState(false);
   const [mostrarModalBaixa, setMostrarModalBaixa] = useState(false);
   const [internacaoSelecionada, setInternacaoSelecionada] = useState(null);
   const [salvando, setSalvando] = useState(false);
   const [quartosPorId, setQuartosPorId] = useState({});
   
-  // Estados do formulário de nova internação
   const [novaInternacao, setNovaInternacao] = useState({
     idosoId: '',
     quartoId: '',
@@ -66,9 +64,8 @@ const SataInternacoes = () => {
     dataEntrada: new Date().toISOString().split('T')[0]
   });
 
-  // Parâmetros estáveis para busca remota de quartos (não utilizado com items locais)
-  // Removido para evitar aviso de variável não utilizada
-
+  // Ao abrir, carrega dados e aplica idoso pré-selecionado
+  
   useEffect(() => {
     carregarDados();
     
@@ -81,7 +78,7 @@ const SataInternacoes = () => {
     }
   }, [location]);
 
-  // Carregar camas disponíveis quando o quarto for selecionado
+  // Atualiza camas quando o quarto muda
   useEffect(() => {
     if (novaInternacao.quartoId) {
       carregarCamasDisponiveis(novaInternacao.quartoId);
@@ -91,7 +88,7 @@ const SataInternacoes = () => {
     }
   }, [novaInternacao.quartoId]);
 
-  // Polling suave para refletir disponibilidade em tempo real enquanto a modal está aberta
+  // Mantém disponibilidade atualizada enquanto a modal estiver aberta
   useEffect(() => {
     if (!mostrarModalNova) return;
     const intervalId = setInterval(async () => {
@@ -103,12 +100,13 @@ const SataInternacoes = () => {
           setCamasDisponiveis(camas);
         }
       } catch {
-        // Ignorar erros de polling para não interromper a UI
+        void 0;
       }
     }, 5000);
     return () => clearInterval(intervalId);
   }, [mostrarModalNova, novaInternacao.quartoId]);
 
+  // Carrega listas de internações, idosos e quartos
   const carregarDados = async () => {
     try {
       setCarregando(true);
@@ -118,7 +116,6 @@ const SataInternacoes = () => {
         internacaoService.buscarQuartosDisponiveis()
       ]);
       
-      // Garantir que dados inválidos da API não quebrem a renderização
       setInternacoes(Array.isArray(internacoesData) ? internacoesData : []);
       setIdosos(Array.isArray(idososData) ? idososData : []);
       setQuartosDisponiveis(Array.isArray(quartosData) ? quartosData : []);
@@ -130,6 +127,7 @@ const SataInternacoes = () => {
     }
   };
 
+  // Busca camas disponíveis do quarto escolhido
   const carregarCamasDisponiveis = async (quartoId) => {
     try {
       const camas = await internacaoService.buscarCamasDisponiveis(quartoId);
@@ -140,12 +138,12 @@ const SataInternacoes = () => {
     }
   };
 
+  // Salva uma nova internação e atualiza a lista
   const handleNovaInternacao = async (e) => {
     e.preventDefault();
     setSalvando(true);
     
     try {
-      // Adaptar os dados para o formato esperado pelo backend
       const internacaoData = {
         idoso_id: novaInternacao.idosoId,
         quarto_id: novaInternacao.quartoId,
@@ -172,6 +170,7 @@ const SataInternacoes = () => {
     }
   };
 
+  // Finaliza internação selecionada
   const handleDarBaixa = async () => {
     setSalvando(true);
     
@@ -188,11 +187,13 @@ const SataInternacoes = () => {
     }
   };
 
+  // Retorna o nome do idoso pelo id
   const obterNomeIdoso = (idosoId) => {
     const idoso = idosos.find(i => i.id === idosoId);
     return idoso ? idoso.nome : 'Idoso não encontrado';
   };
 
+  // Retorna o número do quarto pelo id
   const obterNumeroQuarto = (quartoId) => {
     const quarto = quartosDisponiveis.find(q => String(q.id) === String(quartoId));
     if (quarto) return quarto.numero;
@@ -200,7 +201,7 @@ const SataInternacoes = () => {
     return numeroCache !== undefined ? numeroCache : String(quartoId);
   };
 
-  // Prefetch: garantir número do quarto mesmo quando não está em "disponíveis"
+  // Busca número do quarto quando não está na lista
   useEffect(() => {
     const ids = Array.from(new Set((internacoes || []).map(i => i.quarto_id)));
     const missing = ids.filter(id => {
@@ -228,11 +229,12 @@ const SataInternacoes = () => {
           setQuartosPorId(prev => ({ ...prev, ...updates }));
         }
       } catch {
-        // Silenciar erro de prefetch
+        void 0;
       }
     })();
   }, [internacoes, quartosDisponiveis, quartosPorId]);
 
+  // Calcula dias da internação pelo início
   const calcularDiasInternacao = (dataEntrada) => {
     const entrada = new Date(dataEntrada);
     const hoje = new Date();
@@ -241,7 +243,7 @@ const SataInternacoes = () => {
     return diffDays;
   };
 
-  // Filtrar internações
+  // Aplica filtros de status e busca
   const internacoesFiltradas = internacoes.filter(internacao => {
     const matchStatus = filtroStatus === 'todas' || 
       (filtroStatus === 'ativas' && internacao.status === 'ativa') ||
@@ -289,7 +291,7 @@ const SataInternacoes = () => {
   return (
     <Navbar disableSidebar={mostrarModalNova}>
       <div className="py-4 container-fluid">
-        {/* Header */}
+        
         <div className="page-header">
           <div className="linha-cabecalho d-flex justify-content-between align-items-center">
             <div>
@@ -326,7 +328,7 @@ const SataInternacoes = () => {
           </div>
         </div>
 
-          {/* Filtros e Busca */}
+          
           <Row className="mb-4">
             <Col md={12}>
               <Card className="filter-card">
@@ -373,7 +375,7 @@ const SataInternacoes = () => {
             </Col>
           </Row>
 
-          {/* Métricas rápidas */}
+          
           <Row className="mb-4">
             <Col md={4} sm={12} className="mb-3">
               <Card className="stats-card text-center">
@@ -401,7 +403,7 @@ const SataInternacoes = () => {
             </Col>
           </Row>
 
-          {/* Lista de Internações */}
+          
           {internacoesFiltradas.length === 0 ? (
             <Card className="text-center py-5">
               <Card.Body>
@@ -471,7 +473,7 @@ const SataInternacoes = () => {
             </Card>
           )}
 
-          {/* Modal Nova Internação */}
+          
           <Modal
             show={mostrarModalNova}
             onHide={() => setMostrarModalNova(false)}
@@ -565,7 +567,7 @@ const SataInternacoes = () => {
             </Form>
           </Modal>
 
-          {/* Modal de confirmação de baixa */}
+          
           <Modal show={mostrarModalBaixa} onHide={() => setMostrarModalBaixa(false)} centered>
             <Modal.Header closeButton>
               <Modal.Title>Confirmar Baixa</Modal.Title>

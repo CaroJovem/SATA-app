@@ -1,3 +1,4 @@
+// Formata nome da cama a partir de número/letra
 const getCamaNome = (camaNumero) => {
     if (camaNumero === null || camaNumero === undefined || camaNumero === '') return null;
     const valor = String(camaNumero).trim();

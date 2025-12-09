@@ -1,3 +1,4 @@
+// Rotas de autenticação: login, sessão e senhas
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
@@ -39,8 +40,3 @@ router.post('/register', (req, res) => authController.register(req, res));
 router.get('/check-unique', (req, res) => authController.checkUnique(req, res));
 
 module.exports = router;
-/*
-  Rotas de Autenticação
-  - Endpoints públicos: login, logout, me, registro e recuperação de senha.
-  - Prefixo: `/api/auth`.
-*/

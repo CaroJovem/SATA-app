@@ -1,3 +1,4 @@
+// Rotas de estoque de doações: similares e processamento de itens
 const express = require('express');
 const { DonationStockService } = require('../services/DonationStockService');
 const router = express.Router();
@@ -47,8 +48,3 @@ router.post('/processar-item', async (req, res) => {
 });
 
 module.exports = router;
-/*
-  Rotas de Estoque de Doações
-  - Endpoints para consulta e ajustes de estoque relacionado a doações.
-  - Prefixo: `/api/estoque/doacoes`.
-*/

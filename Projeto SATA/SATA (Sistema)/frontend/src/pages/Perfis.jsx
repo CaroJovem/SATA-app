@@ -1,8 +1,4 @@
-/*
-  Página Perfis (Admin)
-  - Gerencia usuários do sistema: listagem, filtros, criação/edição, status, reset e exclusão.
-  - Inclui proteções contra repetição de submissão, limite de tentativas e validações de formulário.
-*/
+// Página de perfis (Admin): gerencia usuários e permissões
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, InputGroup, Alert, Modal, Spinner } from 'react-bootstrap';

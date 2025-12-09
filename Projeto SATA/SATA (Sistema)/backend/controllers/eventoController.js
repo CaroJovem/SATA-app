@@ -1,7 +1,8 @@
+// Controlador de eventos: listar, buscar, criar, atualizar e remover
 const eventoRepository = require('../repository/eventoRepository');
-// Removido: criação de notificações relacionadas a eventos
 
 class EventoController {
+  // Lista todos os eventos
   async getAll(req, res) {
     try {
       const eventos = await eventoRepository.findAll();
@@ -11,6 +12,7 @@ class EventoController {
     }
   }
 
+  // Busca eventos pelo título
   async searchByTitulo(req, res) {
     try {
       const { titulo = '' } = req.query || {};
@@ -21,6 +23,7 @@ class EventoController {
     }
   }
 
+  // Busca evento por ID
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -34,6 +37,7 @@ class EventoController {
     }
   }
 
+  // Cria novo evento
   async create(req, res) {
     try {
       const payload = req.body || {};
@@ -46,6 +50,7 @@ class EventoController {
     }
   }
 
+  // Atualiza evento
   async update(req, res) {
     try {
       const { id } = req.params;
@@ -62,6 +67,7 @@ class EventoController {
     }
   }
 
+  // Remove evento
   async remove(req, res) {
     try {
       const { id } = req.params;
@@ -75,6 +81,7 @@ class EventoController {
     }
   }
 
+  // Lista doações ligadas a um evento
   async getDoacoes(req, res) {
     try {
       const { id } = req.params;
@@ -86,6 +93,7 @@ class EventoController {
     }
   }
 
+  // Gera relatório de doações do evento (CSV ou JSON)
   async getRelatorio(req, res) {
     try {
       const { id } = req.params;
@@ -134,7 +142,3 @@ class EventoController {
 }
 
 module.exports = new EventoController();
-/*
-  Controlador de Eventos
-  - CRUD e listagem de eventos; lida com intervalos de data e ordenação.
-*/

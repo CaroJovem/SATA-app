@@ -1,7 +1,8 @@
+// Serviço de internações: abrir, encerrar e listar
 import api from './api';
 
 const internacaoService = {
-  // Listar todas as internações
+  // Lista todas as internações
   async listarTodas() {
     try {
       const response = await api.get('/internacoes');
@@ -12,7 +13,7 @@ const internacaoService = {
     }
   },
 
-  // Buscar internação por ID
+  // Busca internação por ID
   async buscarPorId(id) {
     try {
       const response = await api.get(`/internacoes/${id}`);
@@ -23,7 +24,7 @@ const internacaoService = {
     }
   },
 
-  // Criar nova internação
+  // Cria nova internação
   async criar(dadosInternacao) {
     try {
       const response = await api.post('/internacoes', dadosInternacao);
@@ -34,7 +35,7 @@ const internacaoService = {
     }
   },
 
-  // Dar baixa na internação
+  // Dá baixa na internação
   async darBaixa(id, motivoSaida) {
     try {
       const response = await api.put(`/internacoes/${id}/baixa`, {
@@ -47,12 +48,12 @@ const internacaoService = {
     }
   },
 
-  // Compatibilidade: manter método antigo chamando o novo
+  // Atalho: método antigo chama o novo
   async finalizar(id, motivoSaida) {
     return this.darBaixa(id, motivoSaida);
   },
 
-  // Buscar internações ativas
+  // Lista internações ativas
   async listarAtivas() {
     try {
       const response = await api.get('/internacoes/ativas');
@@ -63,7 +64,7 @@ const internacaoService = {
     }
   },
 
-  // Buscar quartos disponíveis
+  // Lista quartos disponíveis
   async buscarQuartosDisponiveis() {
     try {
       const response = await api.get('/quartos/disponiveis');
@@ -74,7 +75,7 @@ const internacaoService = {
     }
   },
 
-  // Buscar camas disponíveis por quarto
+  // Lista camas disponíveis de um quarto
   async buscarCamasDisponiveis(quartoId) {
     try {
       if (!quartoId) return [];
@@ -88,7 +89,3 @@ const internacaoService = {
 };
 
 export default internacaoService;
-/*
-  Serviço de Internações
-  - Abertura/encerramento e listagem de internações.
-*/

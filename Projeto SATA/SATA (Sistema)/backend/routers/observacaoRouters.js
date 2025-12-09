@@ -1,3 +1,4 @@
+// Rotas de observações de idosos
 const express = require('express');
 const observacaoController = require('../controllers/observacaoController.js');
 const router = express.Router({ mergeParams: true });

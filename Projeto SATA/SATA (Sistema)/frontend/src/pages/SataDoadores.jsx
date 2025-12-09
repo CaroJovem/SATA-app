@@ -1,3 +1,4 @@
+// Página de gestão de doadores
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Alert } from 'react-bootstrap';
 import Navbar from '../components/Navbar';

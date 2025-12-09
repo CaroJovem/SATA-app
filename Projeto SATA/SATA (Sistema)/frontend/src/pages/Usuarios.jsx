@@ -1,3 +1,4 @@
+// Página de usuários: criação e redefinição de senha
 import { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge } from 'react-bootstrap';
 import Navbar from '../components/Navbar';

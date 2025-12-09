@@ -1,7 +1,9 @@
+// Controlador de observações de idosos
 const observacaoRepository = require('../repository/observacaoRepository.js');
 
 class ObservacaoController {
 
+    // Lista observações de um idoso
     async list(req, res) {
         try {
             const { idosoId } = req.params;
@@ -12,6 +14,7 @@ class ObservacaoController {
         }
     }
 
+    // Cadastra nova observação
     async create(req, res) {
         try {
             const { idosoId } = req.params;
@@ -28,6 +31,7 @@ class ObservacaoController {
         }
     }
 
+    // Atualiza uma observação
     async update(req, res) {
         try {
             const { idosoId, obsId } = req.params;
@@ -49,6 +53,7 @@ class ObservacaoController {
         }
     }
 
+    // Remove uma observação
     async delete(req, res) {
         try {
             const { idosoId, obsId } = req.params;

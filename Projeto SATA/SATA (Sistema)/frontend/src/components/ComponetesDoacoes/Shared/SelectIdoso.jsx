@@ -1,9 +1,9 @@
+// Campo de busca de Idoso com dropdown
 import { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import idosoService from "../../../services/idosoService";
 
-// Componente de busca dinâmica inspirado no SearchSelect (base fornecida)
-// Mantém a lógica e estrutura do projeto, adaptando apenas para Idoso
+// Campo com busca dinâmica de idosos
 function SelectIdoso({ setIdoso, setErrors, setValidated, errors, selectedIdosoEdit, errorKey = "idoso" }) {
   const [listaIdosos, setListaIdosos] = useState([]);
 

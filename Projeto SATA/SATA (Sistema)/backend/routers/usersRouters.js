@@ -1,3 +1,4 @@
+// Rotas de usuários: gestão administrativa de perfis
 const express = require('express');
 const router = express.Router();
 const usersController = require('../controllers/usersController');
@@ -35,8 +36,3 @@ router.get('/validate-email', (req, res) => usersController.validateEmail(req, r
 router.get('/me/permissions', authenticate, (req, res) => usersController.getPermissions(req, res));
 
 module.exports = router;
-/*
-  Rotas de Usuários
-  - Endpoints administrativos para gestão de perfis e status.
-  - Prefixo: `/api/users`.
-*/

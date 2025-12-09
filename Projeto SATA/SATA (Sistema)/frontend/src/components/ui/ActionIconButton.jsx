@@ -1,3 +1,4 @@
+// Botão de ação com ícone
 import React from 'react';
 import { Button } from 'react-bootstrap';
 

@@ -1,3 +1,4 @@
+                                    // Modelo de doador: dados de contato e documentos
 class Doador {
     constructor(data) {
         // Suporta payloads vindos de Doacao com { doadorId, nome } ou número simples (id do doador)
@@ -62,6 +63,7 @@ class Doador {
         this.representante = data.representante || data.representanteLegal || "";
     }
 
+    // Valida nome, documento e telefone
     validate() {
         const errors = []
 
@@ -81,6 +83,7 @@ class Doador {
     }
 
 
+    // Serializa doador para resposta
     toJSON() {
         return {
             id: this.id,
@@ -104,7 +107,3 @@ class Doador {
 }
 
 module.exports = Doador;
-/*
-  Modelo Doador
-  - Representa doadores com dados de contato e histórico.
-*/

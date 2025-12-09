@@ -1,3 +1,4 @@
+// Swagger/OpenAPI: monta documentação interativa em /api/docs
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -86,7 +87,3 @@ function mountSwagger(app) {
 }
 
 module.exports = { mountSwagger };
-/*
-  Swagger (OpenAPI)
-  - Gera e monta documentação interativa para a API em `/api/docs`.
-*/

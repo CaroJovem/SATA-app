@@ -1,3 +1,4 @@
+// Modal de movimentação de estoque de produto
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
 import { movimentarProduto } from '../../services/produtosService'

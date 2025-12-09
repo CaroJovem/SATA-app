@@ -1,6 +1,8 @@
+// Serviço de estoque de doações: similares e processamento
 import api from './api';
 
 const donationStockService = {
+  // Busca produtos similares por nome/categoria
   async buscarSimilares(nome = '', categoria = '') {
     try {
       const { data } = await api.post('/estoque/doacoes/similares', { nome, categoria }, { timeout: 1200 });
@@ -12,6 +14,7 @@ const donationStockService = {
     }
   },
 
+  // Processa entrada de item doado no estoque
   async processarItem(payload) {
     try {
       const { data } = await api.post('/estoque/doacoes/processar-item', payload);
@@ -25,7 +28,3 @@ const donationStockService = {
 };
 
 export default donationStockService;
-/*
-  Serviço de Estoque de Doações (Frontend)
-  - Chamadas relacionadas a saldo e histórico de estoque de doações.
-*/

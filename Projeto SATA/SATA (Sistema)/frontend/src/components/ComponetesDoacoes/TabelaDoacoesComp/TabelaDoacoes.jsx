@@ -1,3 +1,4 @@
+// Tabela de doações com ações e paginação
 import React, { useRef, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';

@@ -1,3 +1,4 @@
+// Repositório de doações: consultas, criação e atualizações
 const db = require("../config/database");
 const LRUCache = require('../utils/lruCache');
 const nameCache = new LRUCache(1000);

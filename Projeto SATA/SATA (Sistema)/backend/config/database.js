@@ -1,3 +1,4 @@
+// Configuração do banco MySQL e inicialização do schema
 const mysql = require('mysql2/promise');
 const hasCloudEnv = !!(process.env.RAILWAY_PRIVATE_DOMAIN || process.env.RAILWAY_TCP_PROXY_DOMAIN || process.env.MYSQLHOST);
 if (!hasCloudEnv) { try { require('dotenv').config(); } catch (_) {} }

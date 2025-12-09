@@ -1,3 +1,4 @@
+// Controlador de doadores: listar, buscar, criar e atualizar
 const Doador = require("../models/doador");
 const DoadorRepository = require("../repository/doadoRepository");
 const DoacaoRepository = require("../repository/doacaoRepository");
@@ -9,6 +10,7 @@ const normalizeDocOrNull = (v) => {
 };
 
 class DoadorController {
+    // Lista todos os doadores
     async getAll(req, res) {
         try {
             const doadores = await DoadorRepository.findAll();
@@ -25,6 +27,7 @@ class DoadorController {
         }
     }
     
+    // Busca doadores por termos
     async getByBusca(req, res) {
         try {
             const {filtros} = req.body;
@@ -42,6 +45,7 @@ class DoadorController {
         }
     }
 
+    // Cadastra um novo doador
     async create(req, res) {
         try {
             const body = { 
@@ -88,6 +92,7 @@ class DoadorController {
         }
     }
 
+    // Busca doador por ID
     async getById(req, res) {
         try {
             const { id } = req.params;
@@ -110,6 +115,7 @@ class DoadorController {
         }
     }
 
+    // Atualiza dados de um doador
     async update(req, res) {
         try {
             const { id } = req.params;

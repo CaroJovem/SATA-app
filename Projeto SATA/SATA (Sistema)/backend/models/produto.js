@@ -1,3 +1,4 @@
+// Modelo de produto com validação e serialização
 class Produto {
   constructor(data = {}) {
     this.id = data.id || null;
@@ -16,6 +17,7 @@ class Produto {
     this.data_atualizacao = data.data_atualizacao || null;
   }
 
+  // Valida campos de produto (nome, categoria, unidade, preços e estoque)
   validate() {
     const errors = [];
     const categoriasValidas = ['Alimentos','Higiene','Medicamentos','Roupas','Limpeza','Outros'];
@@ -40,6 +42,7 @@ class Produto {
     return errors;
   }
 
+  // Serializa produto para resposta
   toJSON() {
     return {
       id: this.id,
@@ -61,7 +64,3 @@ class Produto {
 }
 
 module.exports = Produto;
-/*
-  Modelo Produto
-  - Define estrutura e validações de produtos e limites de estoque.
-*/

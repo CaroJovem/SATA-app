@@ -1,3 +1,4 @@
+// Botão de ajuda com modal explicativo
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { QuestionCircle } from 'react-bootstrap-icons';

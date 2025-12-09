@@ -1,3 +1,4 @@
+// Página de notificações: lista, conta e permite marcar como lidas
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
 import { BsBell, BsSearch, BsFilter, BsCheck2All, BsEye, BsEyeSlash, BsTrash } from 'react-icons/bs';
@@ -28,7 +29,7 @@ const Notificacoes = () => {
   const [selecionadas, setSelecionadas] = useState([]);
   const [paginacao, setPaginacao] = useState({
     pagina: 1,
-    limite: 10,
+    limite: 20,
     total: 0
   });
 
@@ -426,7 +427,3 @@ const Notificacoes = () => {
 };
 
 export default Notificacoes;
-/*
-  Página Notificações
-  - Lista notificações do usuário, contadores e marcações de leitura.
-*/

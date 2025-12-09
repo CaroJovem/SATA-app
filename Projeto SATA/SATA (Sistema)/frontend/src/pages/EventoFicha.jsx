@@ -1,3 +1,4 @@
+// Ficha de evento para impressão
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Button, Spinner } from 'react-bootstrap'

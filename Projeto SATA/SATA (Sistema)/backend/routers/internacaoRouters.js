@@ -1,3 +1,4 @@
+// Rotas de internações: criar, listar e encerrar
 const express = require('express');
 const internacaoController = require('../controllers/internacaoController');
 
@@ -15,8 +16,3 @@ router.put('/:id/baixa', internacaoController.darBaixa);
 router.put('/:id/finalizar', internacaoController.finalizar);
 
 module.exports = router;
-/*
-  Rotas de Internações
-  - Endpoints para criar, listar e encerrar internações.
-  - Prefixo: `/api/internacoes`.
-*/

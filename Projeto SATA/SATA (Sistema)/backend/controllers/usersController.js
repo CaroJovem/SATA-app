@@ -1,9 +1,4 @@
-/*
-  Controlador de Usuários
-  - CRUD de perfis, atualização de status, validação e reenvio de email.
-  - Aplica normalização de papel e políticas de senha.
-  - Integra com serviço de email (SMTP) e registra eventos de auditoria quando disponível.
-*/
+// Controlador de usuários: CRUD simples e permissões
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const UserRepository = require('../repository/userRepository');
@@ -20,11 +15,7 @@ function normalizeRole(role) {
 }
 
 class UsersController {
-  /*
-    Listagem de usuários
-    Parâmetros (query): `status`, `role`, `page`, `pageSize`, `search`
-    - Suporta paginação e filtro por status/papel e termo de busca.
-  */
+  // Lista usuários com filtros e paginação
   async list(req, res) {
     try {
       const { status, role, page = 1, pageSize = 10, search } = req.query;
@@ -35,12 +26,7 @@ class UsersController {
     }
   }
 
-  /*
-    Criação de usuário
-    Parâmetros (body): `username`, `email`, `role`, `password`
-    - Valida entrada, unicidade e política de senha; cria perfil com status `ativo`.
-    - Envio de email de validação desativado.
-  */
+  // Cria um novo usuário
   async create(req, res) {
     try {
       const { username, email, role, password } = req.body;
@@ -63,11 +49,7 @@ class UsersController {
     }
   }
 
-  /*
-    Atualização de usuário
-    Parâmetros: `id` (params), `username`, `email`, `role` (body)
-    - Garante unicidade ao alterar nome/email e normaliza papel.
-  */
+  // Atualiza dados de um usuário
   async update(req, res) {
     try {
       const { id } = req.params;
@@ -92,11 +74,7 @@ class UsersController {
     }
   }
 
-  /*
-    Exclusão de usuário
-    Parâmetros: `id` (params)
-    - Remove perfil e registra auditoria de deleção quando disponível.
-  */
+  // Remove um usuário
   async remove(req, res) {
     try {
       const { id } = req.params;
@@ -111,26 +89,17 @@ class UsersController {
 
   // Removido: atualização de status via endpoint administrativo
 
-  /*
-    Validar email
-    - Desativado: fluxo de validação por email removido.
-  */
+  // Validação de email desativada
   async validateEmail(req, res) {
     return res.status(410).json({ success: false, error: 'Validação por email desativada' });
   }
 
-  /*
-    Reenviar validação de email
-    - Desativado: envio de validação por email removido.
-  */
+  // Reenvio de validação de email desativado
   async resendValidation(req, res) {
     return res.status(410).json({ success: false, error: 'Validação por email desativada' });
   }
 
-  /*
-    Permissões do usuário autenticado para gerenciamento de senhas
-    - Retorna papel e flag `can_reset_passwords` para o frontend decidir quais opções exibir.
-  */
+  // Retorna papel e permissões relacionadas a senhas
   async getPermissions(req, res) {
     try {
       if (!req.user || !req.user.id) return res.status(401).json({ success: false, error: 'Não autenticado' });

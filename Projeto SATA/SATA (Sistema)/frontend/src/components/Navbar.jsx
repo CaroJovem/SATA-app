@@ -1,3 +1,4 @@
+// Barra de navegação e menu lateral da aplicação
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BsList, BsChevronLeft, BsChevronRight, BsDoorClosedFill, BsPeopleFill, BsCalendarEventFill, BsPersonFill, BsBoxArrowRight, BsKeyFill } from 'react-icons/bs';

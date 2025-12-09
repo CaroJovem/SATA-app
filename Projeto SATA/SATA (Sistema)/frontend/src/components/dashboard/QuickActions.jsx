@@ -1,3 +1,4 @@
+// Ações rápidas do dashboard
 import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { PeopleFill, BoxSeam, CalendarEvent, DoorClosed, BellFill, CashStack } from 'react-bootstrap-icons';

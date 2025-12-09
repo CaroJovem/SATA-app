@@ -1,3 +1,4 @@
+// Rotas de notificações: listagem, contadores e marcação de leitura
 const express = require('express');
 const router = express.Router();
 const notificacaoController = require('../controllers/notificacaoController');
@@ -21,8 +22,3 @@ router.post('/cadastro', (req, res) => notificacaoController.criarNotificacaoCad
 router.post('/estoque-baixo', (req, res) => notificacaoController.criarNotificacaoEstoqueBaixo(req, res));
 
 module.exports = router;
-/*
-  Rotas de Notificações
-  - Endpoints para consulta, contadores e marcação de notificações.
-  - Prefixo: `/api/notificacoes`.
-*/

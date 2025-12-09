@@ -1,3 +1,4 @@
+// Repositório de usuários: consultas e atualizações de credenciais
 const db = require('../config/database');
 
 const UserRepository = {

@@ -1,3 +1,4 @@
+// Página de lista e gestão de quartos
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Button, Form, InputGroup, Alert, Modal, Spinner } from 'react-bootstrap';
 import { PlusCircle, Funnel, Pencil, Trash, DoorClosed } from 'react-bootstrap-icons';

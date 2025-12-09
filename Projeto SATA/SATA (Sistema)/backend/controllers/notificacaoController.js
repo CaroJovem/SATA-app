@@ -10,6 +10,7 @@ function normalizeTipo(tipo) {
 }
 
 class NotificacaoController {
+  // Lista notificações com filtros e paginação
   async getAll(req, res) {
     try {
       const { tipo, prioridade, lida, usuario_id, referencia_tipo, search, data_inicio, data_fim, page = 1, pageSize = 20, sort = 'data_criacao', order = 'DESC' } = req.query;
@@ -29,6 +30,7 @@ class NotificacaoController {
     }
   }
 
+  // Busca uma notificação pelo ID
   async getById(req, res) {
     try {
       const id = Number(req.params.id);
@@ -40,6 +42,7 @@ class NotificacaoController {
     }
   }
 
+  // Cria uma nova notificação
   async create(req, res) {
     try {
       const notificacao = new Notificacao(req.body);
@@ -53,6 +56,7 @@ class NotificacaoController {
     }
   }
 
+  // Atualiza uma notificação existente
   async update(req, res) {
     try {
       const id = Number(req.params.id);
@@ -70,6 +74,7 @@ class NotificacaoController {
     }
   }
 
+  // Apaga uma notificação pelo ID
   async delete(req, res) {
     try {
       const id = Number(req.params.id);
@@ -83,6 +88,7 @@ class NotificacaoController {
     }
   }
 
+  // Apaga várias notificações de uma vez
   async deletarVarias(req, res) {
     try {
       const { ids } = req.body || {};
@@ -95,6 +101,7 @@ class NotificacaoController {
     }
   }
 
+  // Marca uma notificação como lida
   async marcarComoLida(req, res) {
     try {
       const id = Number(req.params.id);
@@ -109,6 +116,7 @@ class NotificacaoController {
     }
   }
 
+  // Marca várias notificações como lidas
   async marcarVariasComoLidas(req, res) {
     try {
       const { ids } = req.body || {};
@@ -121,6 +129,7 @@ class NotificacaoController {
     }
   }
 
+  // Lista notificações recentes
   async getRecentes(req, res) {
     try {
       const { limite = 10, usuario_id } = req.query;
@@ -131,6 +140,7 @@ class NotificacaoController {
     }
   }
 
+  // Retorna contadores (total, não lidas, lidas)
   async getContadores(req, res) {
     try {
       const { usuario_id } = req.query;
@@ -142,6 +152,7 @@ class NotificacaoController {
     }
   }
 
+  // Cria notificação do tipo cadastro
   async criarNotificacaoCadastro(req, res) {
     try {
       const { tipo_cadastro, nome_item, usuario_id } = req.body;
@@ -155,6 +166,7 @@ class NotificacaoController {
     }
   }
 
+  // Cria notificação de estoque baixo
   async criarNotificacaoEstoqueBaixo(req, res) {
     try {
       const { produto, usuario_id } = req.body;

@@ -1,3 +1,4 @@
+// Tabela padrão estilizada com Bootstrap
 import React from 'react';
 import { Table } from 'react-bootstrap';
 

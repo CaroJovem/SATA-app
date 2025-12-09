@@ -1,3 +1,4 @@
+// Submodelo: doação de alimentos
 class DoacaoAlimentos {
   constructor(data = {}) {
     this.tipo_alimento = data?.tipo_alimento ?? data?.doacao?.tipo_alimento ?? data?.item ?? null;
@@ -7,6 +8,7 @@ class DoacaoAlimentos {
     this.produto_categoria = data?.produto_categoria ?? 'Alimentos';
   }
 
+  // Valida tipo e quantidade de alimento
   validate() {
     const errors = [];
     if (!this.tipo_alimento || String(this.tipo_alimento).trim().length === 0) {
@@ -18,6 +20,7 @@ class DoacaoAlimentos {
     return errors;
   }
 
+  // Serializa dados da doação de alimentos
   toJSON() {
     return {
       tipo_alimento: this.tipo_alimento,

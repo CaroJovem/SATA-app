@@ -1,12 +1,15 @@
+// Serviço para idosos: funções para listar, buscar e alterar dados
 import api from './api';
 
 const resource = '/idosos';
 
+// Cabeçalho CSRF para operações protegidas
 const csrfHeader = () => {
     const t = typeof localStorage !== 'undefined' ? localStorage.getItem('csrfToken') : null;
     return t ? { 'x-csrf-token': t } : {};
 };
 
+// Lista todos os idosos
 const getAll = async () => {
     try {
         const { data } = await api.get(resource);
@@ -25,6 +28,7 @@ const getAll = async () => {
     }
 };
 
+// Busca um idoso pelo ID
 const getById = async (id) => {
     try {
         const { data } = await api.get(`${resource}/${id}`);
@@ -48,6 +52,7 @@ const getById = async (id) => {
     }
 };
 
+// Busca ficha completa do idoso
 const getFicha = async (id) => {
     try {
         const { data } = await api.get(`${resource}/${id}/ficha`);
@@ -59,6 +64,7 @@ const getFicha = async (id) => {
     }
 };
 
+// Cadastra um novo idoso
 const add = async (idoso) => {
     try {
         const { data } = await api.post(resource, idoso);
@@ -71,6 +77,7 @@ const add = async (idoso) => {
     }
 };
 
+// Atualiza dados do idoso
 const update = async (id, idoso) => {
     try {
         const { data } = await api.put(`${resource}/${id}`, {
@@ -86,6 +93,7 @@ const update = async (id, idoso) => {
     }
 };
 
+// Remove um idoso
 const remove = async (id) => {
     try {
         const { data } = await api.delete(`${resource}/${id}`);
@@ -97,6 +105,7 @@ const remove = async (id) => {
     }
 };
 
+// Atualiza o status do idoso
 const updateStatus = async (id, status) => {
     try {
         const { data } = await api.put(`${resource}/${id}/status`, { status });
@@ -108,6 +117,7 @@ const updateStatus = async (id, status) => {
     }
 };
 
+// Adiciona uma observação ao idoso
 const addObservacao = async (id, observacaoData) => {
     try {
         const { data } = await api.post(`${resource}/${id}/observacoes`, observacaoData, { headers: csrfHeader() });
@@ -120,6 +130,7 @@ const addObservacao = async (id, observacaoData) => {
     }
 };
 
+// Lista observações do idoso
 const getObservacoes = async (id) => {
     try {
         const { data } = await api.get(`${resource}/${id}/observacoes`);
@@ -132,6 +143,7 @@ const getObservacoes = async (id) => {
     }
 };
 
+// Atualiza uma observação do idoso
 const updateObservacao = async (id, obsId, payload) => {
     try {
         const { data } = await api.put(`${resource}/${id}/observacoes/${obsId}`, payload, { headers: csrfHeader() });
@@ -144,6 +156,7 @@ const updateObservacao = async (id, obsId, payload) => {
     }
 };
 
+// Remove uma observação do idoso
 const deleteObservacao = async (id, obsId) => {
     console.log(`Enviando requisição DELETE para ${resource}/${id}/observacoes/${obsId}`);
     try {
@@ -173,7 +186,3 @@ const idosoService = {
 };
 
 export default idosoService;
-/*
-  Serviço de Idosos
-  - CRUD e consultas de residentes.
-*/

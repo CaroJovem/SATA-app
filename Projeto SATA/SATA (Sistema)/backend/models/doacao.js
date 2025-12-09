@@ -3,6 +3,7 @@ const DoacaoAlimentos = require("./doacaoAlimentos");
 const DoacaoItens = require("./doacaoItens");
 const Doador = require("./doador");
 
+// Modelo de doação: comum aos três tipos
 class Doacao {
     constructor(data) {
         this.id = data.id || null;
@@ -39,7 +40,7 @@ class Doacao {
         }
     }
 
-    //Validações
+    // Valida dados da doação e subtipo
     validate() {
         const errors = [];
 
@@ -92,6 +93,7 @@ class Doacao {
         return errors;
     }
 
+    // Serializa doação para resposta
     toJSON() {
         return {
             id: this.id,
@@ -109,7 +111,3 @@ class Doacao {
     }
 }
 module.exports = Doacao
-/*
-  Modelo Doação
-  - Estrutura comum de doações e campos compartilhados.
-*/

@@ -1,13 +1,15 @@
-// Audit logger simples: evita escrita em disco, mas registra eventos no console.
-// Mantém API compatível e oferece um método genérico para métricas.
+// Logger de auditoria: registra eventos no console
 
+// Registra deleções (placeholder)
 function logDeletion() {
   // Intencionalmente vazio para evitar escrita em disco.
 }
 
+// Registra eventos de segurança (placeholder)
 function logSecurityEvent() {
   // Intencionalmente vazio para evitar escrita em disco.
 }
+// Registra um evento com payload
 function log(event, payload) {
   try {
     const ts = new Date().toISOString();
@@ -17,8 +19,3 @@ function log(event, payload) {
 }
 
 module.exports = { logDeletion, logSecurityEvent, log };
-/*
-  Logger de Auditoria
-  - Utilitário para registro de ações e eventos de segurança.
-  - Não deve quebrar fluxo principal em caso de falhas.
-*/

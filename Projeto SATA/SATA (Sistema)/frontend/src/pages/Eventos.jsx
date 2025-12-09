@@ -1,3 +1,4 @@
+// Página de eventos da instituição
 import { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Button, Form, Modal, Badge, Card, Table, Alert, InputGroup } from 'react-bootstrap';
 import FullCalendar from '@fullcalendar/react';

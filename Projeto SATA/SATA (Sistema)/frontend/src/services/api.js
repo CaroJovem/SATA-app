@@ -1,3 +1,4 @@
+// Cliente HTTP com baseURL e credenciais
 import axios from 'axios';
 const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
 const isLocalhost = /^http:\/\/localhost(?::\d+)?$/i.test(origin) || /^http:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin);
@@ -23,8 +24,3 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
-/*
-  Cliente HTTP (API)
-  - Configura instância com baseURL, cookies e headers padrão.
-  - Centraliza interceptors para tratar erros e autenticação.
-*/

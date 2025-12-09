@@ -1,3 +1,4 @@
+// Rotas de atualização de nomes em lote
 const express = require('express');
 const router = express.Router();
 const { batchUpdate } = require('../services/NameUpdateService');
@@ -17,8 +18,3 @@ router.post('/batch-update', async (req, res) => {
 });
 
 module.exports = router;
-/*
-  Rotas de Atualização de Nomes
-  - Endpoints utilitários para atualização e correção de nomes.
-  - Prefixo: `/api/nomes`.
-*/

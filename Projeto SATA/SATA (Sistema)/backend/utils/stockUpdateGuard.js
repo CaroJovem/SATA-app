@@ -3,9 +3,7 @@ function toNumber(n) {
   return Number.isFinite(v) ? v : 0;
 }
 
-// Decide se devemos atualizar estoque manualmente após inserir doação de produto.
-// Evita duplicação quando o banco já atualizou via trigger/processo paralelo.
-// Retorna { shouldUpdate: boolean, targetQty: number }
+// Decide se atualiza estoque após doação de item
 function computeStockUpdate(preQty, postQty, donatedQty) {
   const pre = toNumber(preQty);
   const post = toNumber(postQty);
@@ -22,7 +20,3 @@ function computeStockUpdate(preQty, postQty, donatedQty) {
 }
 
 module.exports = { computeStockUpdate };
-/*
-  Guarda de Atualização de Estoque
-  - Impede alterações concorrentes ou inválidas em saldos de estoque.
-*/

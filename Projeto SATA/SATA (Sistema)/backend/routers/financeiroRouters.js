@@ -1,3 +1,4 @@
+// Rotas financeiras: lançamentos e manutenção
 const express = require('express');
 const controller = require('../controllers/financeiroController');
 
@@ -10,8 +11,3 @@ router.put('/:id', (req, res) => controller.update(req, res));
 router.delete('/:id', (req, res) => controller.remove(req, res));
 
 module.exports = router;
-/*
-  Rotas Financeiras
-  - Endpoints para entradas, saídas e relatórios locais.
-  - Prefixo: `/api/financeiro`.
-*/

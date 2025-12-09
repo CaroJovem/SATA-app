@@ -1,3 +1,4 @@
+// Submodelo: doação de itens diversos
 class DoacaoItens {
   constructor(data = {}) {
     this.descricao_item = data?.descricao_item ?? data?.doacao?.descricao_item ?? data?.item ?? null;
@@ -8,6 +9,7 @@ class DoacaoItens {
     this.produto_categoria = data?.produto_categoria ?? null;
   }
 
+  // Valida descrição, quantidade e unidade
   validate() {
     const errors = [];
     if (!this.descricao_item || String(this.descricao_item).trim().length === 0) {
@@ -23,6 +25,7 @@ class DoacaoItens {
     return errors;
   }
 
+  // Serializa doação de itens
   toJSON() {
     return {
       descricao_item: this.descricao_item,

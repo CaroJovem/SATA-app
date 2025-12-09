@@ -1,11 +1,4 @@
-/*
-  Componente ActionTile
-  - Exibe um atalho clicável para ações principais do sistema.
-  - Props: `to` (rota), `label`, `description`, `icon`, `variant`, `disabled`.
-  - Acessibilidade: usa `aria-label`, `aria-disabled`, `tabIndex` e previne clique quando desabilitado.
-  Exemplo de uso:
-    <ActionTile to="/idosos" label="Idosos" description="Gerenciar" icon={<PeopleFill />} />
-*/
+// Atalho clicável para ações principais
 import { Link } from 'react-router-dom';
 
 export default function ActionTile({ to, label, description, icon, variant = 'primary', disabled = false }) {

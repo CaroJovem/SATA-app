@@ -1,7 +1,9 @@
+// Controlador financeiro: listar, criar, atualizar e remover lançamentos
 const financeiroRepository = require('../repository/financeiroRepository');
 const { criarNotificacao } = require("./notificacaoController");
 
 class FinanceiroController {
+  // Lista lançamentos financeiros
   async getAll(req, res) {
     try {
       const items = await financeiroRepository.findAll();
@@ -11,6 +13,7 @@ class FinanceiroController {
     }
   }
 
+  // Busca lançamento por ID
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -22,6 +25,7 @@ class FinanceiroController {
     }
   }
 
+  // Cria um lançamento financeiro
   async create(req, res) {
     try {
       const criado = await financeiroRepository.create(req.body || {});
@@ -42,6 +46,7 @@ class FinanceiroController {
     }
   }
 
+  // Atualiza um lançamento financeiro
   async update(req, res) {
     try {
       const { id } = req.params;
@@ -64,6 +69,7 @@ class FinanceiroController {
     }
   }
 
+  // Remove um lançamento financeiro
   async remove(req, res) {
     try {
       const { id } = req.params;
@@ -87,7 +93,3 @@ class FinanceiroController {
 }
 
 module.exports = new FinanceiroController();
-/*
-  Controlador Financeiro
-  - Entradas e saídas locais, com filtros e cálculo de saldos.
-*/

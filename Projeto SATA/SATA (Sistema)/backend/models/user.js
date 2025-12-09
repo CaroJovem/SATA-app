@@ -1,15 +1,17 @@
+// Modelo de usuário com validação simples
 class User {
   constructor(data = {}) {
     this.id = data.id || null;
     this.username = (data.username || '').trim();
     this.email = (data.email || '').trim();
-    this.password = data.password || null; // plain for validation only
-    this.password_hash = data.password_hash || null; // stored
+    this.password = data.password || null; 
+    this.password_hash = data.password_hash || null; 
     this.role = data.role || 'Funcionário';
     this.created_at = data.created_at || null;
     this.updated_at = data.updated_at || null;
   }
 
+  // Valida campos básicos (email, senha, papel)
   validate({ forCreate = true } = {}) {
     const errors = [];
     if (!this.username) errors.push('username é obrigatório');
@@ -32,6 +34,7 @@ class User {
     return errors;
   }
 
+  // Serializa o usuário para resposta
   toJSON() {
     return {
       id: this.id,
@@ -45,8 +48,3 @@ class User {
 }
 
 module.exports = User;
-/*
-  Modelo User
-  - Representa usuário do sistema (atributos, validações, regras).
-  - Utilizado por repositórios e controladores de autenticação/usuários.
-*/

@@ -1,3 +1,4 @@
+// Modal para escolher produto similar ou manter nome
 import { useMemo, useState } from 'react';
 import { Modal, Button, ListGroup, Form, Alert } from 'react-bootstrap';
 

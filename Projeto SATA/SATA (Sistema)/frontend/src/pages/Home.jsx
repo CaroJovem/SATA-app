@@ -1,9 +1,4 @@
-/*
-  Página Home (Dashboard)
-  - Apresenta ações principais por módulo e métricas rápidas do sistema.
-  - Filtra ações por papel do usuário e carrega métricas em paralelo.
-  - Mantém UI acessível com rótulos ARIA e feedbacks visuais.
-*/
+// Página inicial do sistema (dashboard). Mostra ações e métricas resumidas.
 import { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import Navbar from '../components/Navbar';
@@ -19,6 +14,7 @@ import financeiroService from '../services/financeiroService';
 import { listarProdutos } from '../services/produtosService';
 import { obterContadores } from '../services/notificacoesService';
 
+// Componente principal do dashboard
 // Componente principal do dashboard
 export default function Home() {
   const { user } = useAuth();
@@ -54,7 +50,7 @@ export default function Home() {
 
   const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
 
-  // Carrega métricas em paralelo; calcula indicadores do mês corrente
+  // Função que carrega métricas e calcula indicadores do mês atual
   useEffect(() => {
     let mounted = true;
     const carregarMetricas = async () => {
@@ -123,7 +119,9 @@ export default function Home() {
           ? listaProdutos.filter((p) => Number(p.quantidade || 0) <= Number(p.estoque_minimo || 0)).length
           : 0;
 
-        const notificacoesNaoLidas = Number(contadores?.nao_lidas || 0);
+        const notificacoesNaoLidas = Number(
+          (contadores && (contadores.nao_lidas ?? contadores.naoLidas)) ?? 0
+        );
 
         if (mounted) {
           setMetricas({

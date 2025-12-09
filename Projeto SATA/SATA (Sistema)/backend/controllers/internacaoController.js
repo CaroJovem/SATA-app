@@ -1,3 +1,4 @@
+// Controlador de internações: listar, detalhar e criar
 const InternacaoRepository = require('../repository/internacaoRepository');
 const IdosoRepository = require('../repository/idosoRepository');
 const QuartoRepository = require('../repository/quartoRepository');
@@ -5,7 +6,7 @@ const { getCamaNome } = require('../utils/formatters');
 const db = require('../config/database');
 
 class InternacaoController {
-    // Obtém todas as internações
+    // Lista todas as internações
     async getAll(req, res) {
         try {
             const internacoes = await InternacaoRepository.findAll();
@@ -27,7 +28,7 @@ class InternacaoController {
         }
     }
 
-    // Obtém internações ativas - CORRIGIDO
+    // Lista internações ativas
     async getAtivas(req, res) {
         try {
             const internacoes = await InternacaoRepository.getAtivas();
@@ -45,7 +46,7 @@ class InternacaoController {
         }
     }
 
-    // Obtém uma internação por ID
+    // Busca internação por ID
     async getById(req, res) {
         try {
             const { id } = req.params;
@@ -72,7 +73,7 @@ class InternacaoController {
         }
     }
 
-    // Obtém internações de um idoso
+    // Lista internações de um idoso
     async getByUsuarioId(req, res) {
         try {
             const { id } = req.params;
