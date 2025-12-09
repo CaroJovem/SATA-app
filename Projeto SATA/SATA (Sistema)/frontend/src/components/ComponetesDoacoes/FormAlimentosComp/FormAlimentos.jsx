@@ -26,8 +26,7 @@ function FormAlimentos({ onSave }) {
     doacao: {
       item: "",
       qntd: 0,
-      unidade_medida: "Unidade(s)",
-      validade: ""
+      unidade_medida: "Unidade(s)"
     }
   });
 
@@ -124,22 +123,7 @@ function FormAlimentos({ onSave }) {
     }
   }
 
-  const handleChangeValidade = (e) => {
-    const value = e.target.value;
-    setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, validade: value } }));
-    if (!value) {
-      setErrors(prev => ({ ...prev, validade: null }));
-    } else {
-      const hoje = new Date();
-      const dataVal = new Date(value);
-      if (dataVal < hoje.setHours(0,0,0,0)) {
-        setErrors(prev => ({ ...prev, validade: 'A validade não pode ser no passado' }));
-        setValidated(false);
-      } else {
-        setErrors(prev => ({ ...prev, validade: null }));
-      }
-    }
-  }
+  
 
   const handleChangeDescricao = (e) => {
     const value = e.target.value;
@@ -306,13 +290,7 @@ function FormAlimentos({ onSave }) {
                   {errors.unidade_medida}
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Validade (Opcional)</Form.Label>
-                <Form.Control type="date" name="validade" value={doaAlimentos?.doacao?.validade || ''} onChange={handleChangeValidade} isInvalid={!!errors.validade} />
-                <Form.Control.Feedback type="invalid">
-                  {errors.validade}
-                </Form.Control.Feedback>
-              </Form.Group>
+            
               <Form.Group className="mb-3">
                 <SelectDoador setDoador={setSelectedDoador} setErrors={setErrors} errors={errors} setValidated={setValidated} />
               </Form.Group>

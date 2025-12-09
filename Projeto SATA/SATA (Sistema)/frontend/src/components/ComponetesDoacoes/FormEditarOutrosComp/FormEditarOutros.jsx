@@ -120,7 +120,17 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
 
     // Sincroniza seleção de unidade quando dados da doação mudarem
     useEffect(() => {
-        setUnidadeSelecionada(doaOutros?.doacao?.unidade_medida ?? 'Unidade(s)');
+        const raw = String(doaOutros?.doacao?.unidade_medida || '').trim();
+        if (!raw) { setUnidadeSelecionada('Unidade(s)'); setUnidadeOutro(''); return; }
+        const map = { 'unidade(s)': 'Unidade(s)', 'kg': 'Kg', 'l': 'L', 'pacotes': 'Pacotes', 'caixas': 'Caixas', 'm': 'm' };
+        const lower = raw.toLowerCase();
+        if (map[lower]) {
+            setUnidadeSelecionada(map[lower]);
+            setUnidadeOutro('');
+        } else {
+            setUnidadeSelecionada('Outro');
+            setUnidadeOutro(raw);
+        }
     }, [doaOutros?.doacao?.unidade_medida]);
 
     const handleChangeUnidade = (e) => {

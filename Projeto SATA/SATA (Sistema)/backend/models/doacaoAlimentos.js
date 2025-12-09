@@ -4,6 +4,7 @@ class DoacaoAlimentos {
     this.tipo_alimento = data?.tipo_alimento ?? data?.doacao?.tipo_alimento ?? data?.item ?? null;
     this.quantidade = data?.quantidade ?? data?.quantidade_alimento ?? data?.doacao?.quantidade ?? data?.qntd ?? null;
     this.validade = data?.validade ?? null;
+    this.unidade_medida = data?.unidade_medida ?? data?.doacao?.unidade_medida ?? null;
     this.produto_nome = data?.produto_nome ?? null;
     this.produto_categoria = data?.produto_categoria ?? 'Alimentos';
   }
@@ -26,6 +27,7 @@ class DoacaoAlimentos {
       tipo_alimento: this.tipo_alimento,
       quantidade: this.quantidade,
       validade: this.validade,
+      unidade_medida: this.unidade_medida,
       produto_nome: this.produto_nome,
       produto_categoria: this.produto_categoria,
     };

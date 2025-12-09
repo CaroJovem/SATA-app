@@ -100,7 +100,7 @@ function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef:
       return isNaN(n) ? 'R$ 0.00' : `R$ ${n.toFixed(2)}`;
     }
     const q = d?.doacao?.quantidade ?? d?.doacao?.qntd ?? d?.quantidade ?? d?.qntd ?? 0;
-    const un = d?.doacao?.unidade_medida ?? d?.unidade_medida ?? 'Unidade(s)';
+    const un = d?.doacao?.unidade_medida ?? d?.unidade_medida ?? '';
     return `${q} ${un}`.trim();
   }
 

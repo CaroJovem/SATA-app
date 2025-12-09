@@ -16,8 +16,7 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
         doacao: {
           item: "",
           qntd: "",
-          unidade_medida: "Unidade",
-          validade: ""
+          unidade_medida: "Unidade"
         },
         destinatario: "",
         doador: { doadorId: 0, nome: "" },
@@ -48,8 +47,7 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
                 ""
               ),
               qntd: doacaoEdit.doacao?.qntd ?? doacaoEdit.doacao?.quantidade ?? doacaoEdit.quantidade ?? "",
-              unidade_medida: doacaoEdit.doacao?.unidade_medida ?? "Unidade(s)",
-              validade: (doacaoEdit.doacao?.validade || doacaoEdit.validade || "").substring(0,10)
+              unidade_medida: doacaoEdit.doacao?.unidade_medida ?? "Unidade(s)"
             },
             destinatario: doacaoEdit.idoso || "",
             doador: { doadorId: doacaoEdit.doador?.doadorId ?? doacaoEdit.doador?.id ?? 0, nome: doacaoEdit.doador?.nome ?? "" },
@@ -138,7 +136,17 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
   }
 
   useEffect(() => {
-    setUnidadeSelecionada(doaAlimentos?.doacao?.unidade_medida ?? 'Unidade');
+    const raw = String(doaAlimentos?.doacao?.unidade_medida || '').trim();
+    if (!raw) { setUnidadeSelecionada('Unidade(s)'); setUnidadeOutro(''); return; }
+    const map = { 'unidade(s)': 'Unidade(s)', 'kg': 'Kg', 'l': 'L', 'pacotes': 'Pacotes', 'caixas': 'Caixas', 'm': 'm' };
+    const lower = raw.toLowerCase();
+    if (map[lower]) {
+      setUnidadeSelecionada(map[lower]);
+      setUnidadeOutro('');
+    } else {
+      setUnidadeSelecionada('Outro');
+      setUnidadeOutro(raw);
+    }
   }, [doaAlimentos?.doacao?.unidade_medida]);
 
   const handleChangeDescricao = (e) => {
@@ -205,27 +213,7 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
     };
   }
 
-  const handleChangeValidade = (e) => {
-    const value = e.target.value;
-    setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, validade: value } }));
-    if (!value) {
-      setErrors(prev => ({ ...prev, validade: null }));
-      return;
-    }
-    try {
-      const hoje = new Date();
-      const dataVal = new Date(value);
-      if (dataVal < new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) {
-        setErrors(prev => ({ ...prev, validade: 'A validade não pode ser no passado' }));
-        setValidated(false);
-      } else {
-        setErrors(prev => ({ ...prev, validade: null }));
-      }
-    } catch {
-      setErrors(prev => ({ ...prev, validade: 'Data de validade inválida' }));
-      setValidated(false);
-    }
-  }
+  
 
   return (
     <Modal
@@ -294,13 +282,7 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
                   {errors.unidade_medida}
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Validade (Opcional)</Form.Label>
-                <Form.Control type="date" name="validade" value={doaAlimentos?.doacao?.validade || ''} onChange={handleChangeValidade} isInvalid={!!errors.validade} />
-                <Form.Control.Feedback type="invalid">
-                  {errors.validade}
-                </Form.Control.Feedback>
-              </Form.Group>
+              
               <Form.Group className="mb-3">
                 <Form.Label>Observações/Descrição (Opcional)</Form.Label>
                 <Form.Control autoComplete="off"

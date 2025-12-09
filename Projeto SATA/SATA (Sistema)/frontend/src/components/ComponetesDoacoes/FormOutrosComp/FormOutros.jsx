@@ -165,8 +165,8 @@ function FormOutros({ onSave }) {
     } else {
       setErrors({});
       const isOutro = unidadeSelecionada === 'Outro';
-      const unidadeVal = isOutro ? 'Outro' : (doaOutros?.doacao?.unidade_medida || 'Unidade(s)');
-      const obsExtra = isOutro && unidadeOutro ? ` [Unidade personalizada: ${String(unidadeOutro).trim()}]` : '';
+      const unidadeVal = isOutro ? String(unidadeOutro).trim() : (doaOutros?.doacao?.unidade_medida || 'Unidade(s)');
+      const obsExtra = isOutro && unidadeOutro ? '' : '';
       const payload = {
         ...doaOutros,
         obs: `${doaOutros?.obs || ''}${obsExtra}`.trim(),

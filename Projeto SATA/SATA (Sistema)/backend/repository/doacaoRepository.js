@@ -153,6 +153,7 @@ class DoacaoRepository {
                 LEFT JOIN eventos e ON d.evento_id = e.id
                 LEFT JOIN doacaoproduto dp ON dp.doacao_id = d.id
                 LEFT JOIN produtos p ON dp.produto_id = p.id
+                LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
                 WHERE d.id = ?`, [id]);
                 if (rows.length === 0) return null;
                 const r = rows[0];
@@ -423,89 +424,89 @@ class DoacaoRepository {
                 await conn.commit();
                 conn.release();
                 return await this.findById(doacaoId);
-            } else {
-                if (!data || String(data).trim().length === 0) {
-                    await conn.rollback();
-                    conn.release();
-                    throw new Error("Data da doação é obrigatória");
-                }
-                if (!tipo || String(tipo).trim().length === 0) {
-                    await conn.rollback();
-                    conn.release();
-                    throw new Error("Tipo de doação é obrigatório");
-                }
-                const [result] = await conn.execute(`INSERT INTO doacoes (
-                data, tipo, obs, doador, idoso, idoso_id, evento_id) VALUES ( ?, ?, ?, ?, ?, ?, ?)`, [data, tipo, (obs ?? null), doadorId, (idosoNome ?? null), (idosoId ?? null), (eventoId ?? null)]);
-                const doacaoId = result.insertId;
-                // Validação de quantidade positiva
-                const unidadeIns = (doacaoData?.doacao?.unidade_medida ?? null);
-                const qty = Number(doacaoData?.doacao?.qntd ?? doacaoData?.doacao?.quantidade ?? 0);
-                if (!qty || qty <= 0) {
-                    await conn.rollback();
-                    conn.release();
-                    throw new Error("Quantidade doada inválida");
-                }
-                if (tipoNorm(tipo) === 'ALIMENTO') {
-                    const nomeAlimento = (doacaoData?.doacao?.tipo_alimento ?? item ?? '').toString().trim();
-                    if (!nomeAlimento) {
-                        await conn.rollback();
-                        conn.release();
-                        throw new Error("Tipo de alimento é obrigatório");
-                    }
-                    const validade = doacaoData?.doacao?.validade ?? null;
-                    await conn.execute(`INSERT INTO doacoes_alimentos (doacao_id, tipo_alimento, quantidade, validade) VALUES (?, ?, ?, ?)`, [doacaoId, nomeAlimento, qty, validade]);
-                    const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeAlimento, categoria: 'Alimentos', unidade: unidadeIns });
-                    await conn.execute(`UPDATE produtos SET categoria = ?, unidade_medida = ?, quantidade = quantidade + ? WHERE id = ?`, ['Alimentos', unidadeIns, qty, produtoId]);
-                    try {
-                      const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [produtoId]);
-                      const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : qty;
-                      const saldoAnterior = Math.max(0, saldoPosterior - qty);
-                      await MovimentoEstoqueRepository.createWithConn(conn, {
-                        produto_id: produtoId,
-                        tipo: 'entrada',
-                        quantidade: qty,
-                        saldo_anterior: saldoAnterior,
-                        saldo_posterior: saldoPosterior,
-                        doacao_id: doacaoId,
-                        responsavel_id: null,
-                        responsavel_nome: null,
-                        motivo: 'Doação de alimento',
-                        observacao: `Doação #${doacaoId}`,
-                      });
-                    } catch (_) {}
                 } else {
-                    const nomeItem = (doacaoData?.doacao?.descricao_item ?? item ?? '').toString().trim();
-                    if (!nomeItem) {
+                    if (!data || String(data).trim().length === 0) {
                         await conn.rollback();
                         conn.release();
-                        throw new Error("Descrição do item é obrigatória");
+                        throw new Error("Data da doação é obrigatória");
                     }
-                    const estado = doacaoData?.doacao?.estado_conservacao ?? 'Bom';
-                    await conn.execute(`INSERT INTO doacoes_itens (doacao_id, descricao_item, quantidade, estado_conservacao, unidade_medida) VALUES (?, ?, ?, ?, ?)`, [doacaoId, nomeItem, qty, estado, unidadeIns]);
-                    const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria: 'Outros', unidade: unidadeIns });
-                    await conn.execute(`UPDATE produtos SET categoria = ?, unidade_medida = ?, quantidade = quantidade + ? WHERE id = ?`, ['Outros', unidadeIns, qty, produtoId]);
-                    try {
-                      const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [produtoId]);
-                      const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : qty;
-                      const saldoAnterior = Math.max(0, saldoPosterior - qty);
-                      await MovimentoEstoqueRepository.createWithConn(conn, {
-                        produto_id: produtoId,
-                        tipo: 'entrada',
-                        quantidade: qty,
-                        saldo_anterior: saldoAnterior,
-                        saldo_posterior: saldoPosterior,
-                        doacao_id: doacaoId,
-                        responsavel_id: null,
-                        responsavel_nome: null,
-                        motivo: 'Doação de item',
-                        observacao: `Doação #${doacaoId}`,
-                      });
-                    } catch (_) {}
+                    if (!tipo || String(tipo).trim().length === 0) {
+                        await conn.rollback();
+                        conn.release();
+                        throw new Error("Tipo de doação é obrigatório");
+                    }
+                    const [result] = await conn.execute(`INSERT INTO doacoes (
+                data, tipo, obs, doador, idoso, idoso_id, evento_id) VALUES ( ?, ?, ?, ?, ?, ?, ?)`, [data, tipo, (obs ?? null), doadorId, (idosoNome ?? null), (idosoId ?? null), (eventoId ?? null)]);
+                    const doacaoId = result.insertId;
+                    // Validação de quantidade positiva
+                    const unidadeIns = (doacaoData?.doacao?.unidade_medida ?? null);
+                    const qty = Number(doacaoData?.doacao?.qntd ?? doacaoData?.doacao?.quantidade ?? 0);
+                    if (!qty || qty <= 0) {
+                        await conn.rollback();
+                        conn.release();
+                        throw new Error("Quantidade doada inválida");
+                    }
+                    if (tipoNorm(tipo) === 'ALIMENTO') {
+                        const nomeAlimento = (doacaoData?.doacao?.tipo_alimento ?? item ?? '').toString().trim();
+                        if (!nomeAlimento) {
+                            await conn.rollback();
+                            conn.release();
+                            throw new Error("Tipo de alimento é obrigatório");
+                        }
+                        const validade = doacaoData?.doacao?.validade ?? null;
+                        await conn.execute(`INSERT INTO doacoes_alimentos (doacao_id, tipo_alimento, quantidade, validade) VALUES (?, ?, ?, ?)`, [doacaoId, nomeAlimento, qty, validade]);
+                        const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeAlimento, categoria: 'Alimentos', unidade: unidadeIns });
+                        await conn.execute(`UPDATE produtos SET categoria = ?, unidade_medida = ?, quantidade = quantidade + ? WHERE id = ?`, ['Alimentos', unidadeIns, qty, produtoId]);
+                        try {
+                          const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [produtoId]);
+                          const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : qty;
+                          const saldoAnterior = Math.max(0, saldoPosterior - qty);
+                          await MovimentoEstoqueRepository.createWithConn(conn, {
+                            produto_id: produtoId,
+                            tipo: 'entrada',
+                            quantidade: qty,
+                            saldo_anterior: saldoAnterior,
+                            saldo_posterior: saldoPosterior,
+                            doacao_id: doacaoId,
+                            responsavel_id: null,
+                            responsavel_nome: null,
+                            motivo: 'Doação de alimento',
+                            observacao: `Doação #${doacaoId}`,
+                          });
+                        } catch (_) {}
+                    } else {
+                        const nomeItem = (doacaoData?.doacao?.descricao_item ?? item ?? '').toString().trim();
+                        if (!nomeItem) {
+                            await conn.rollback();
+                            conn.release();
+                            throw new Error("Descrição do item é obrigatória");
+                        }
+                        const estado = doacaoData?.doacao?.estado_conservacao ?? 'Bom';
+                        await conn.execute(`INSERT INTO doacoes_itens (doacao_id, descricao_item, quantidade, estado_conservacao, unidade_medida) VALUES (?, ?, ?, ?, ?)`, [doacaoId, nomeItem, qty, estado, unidadeIns]);
+                        const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria: 'Outros', unidade: unidadeIns });
+                        await conn.execute(`UPDATE produtos SET categoria = ?, unidade_medida = ?, quantidade = quantidade + ? WHERE id = ?`, ['Outros', unidadeIns, qty, produtoId]);
+                        try {
+                          const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [produtoId]);
+                          const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : qty;
+                          const saldoAnterior = Math.max(0, saldoPosterior - qty);
+                          await MovimentoEstoqueRepository.createWithConn(conn, {
+                            produto_id: produtoId,
+                            tipo: 'entrada',
+                            quantidade: qty,
+                            saldo_anterior: saldoAnterior,
+                            saldo_posterior: saldoPosterior,
+                            doacao_id: doacaoId,
+                            responsavel_id: null,
+                            responsavel_nome: null,
+                            motivo: 'Doação de item',
+                            observacao: `Doação #${doacaoId}`,
+                          });
+                        } catch (_) {}
+                    }
+                    await conn.commit();
+                    conn.release();
+                    return await this.findById(doacaoId);
                 }
-                await conn.commit();
-                conn.release();
-                return await this.findById(doacaoId);
-            }
         } catch (error) {
             // Fallback sem coluna idoso_id
             try {
@@ -562,8 +563,14 @@ class DoacaoRepository {
                     // Upsert rápido de produto e obtenção de id sem múltiplos SELECTs
                     const categoria = (String(doacaoData?.tipo || '').toUpperCase() === 'A' ? 'Alimentos' : 'Outros');
                     const unidade = (doacaoData?.doacao?.unidade_medida ?? null);
-                    const nomeItem = (item ?? '').toString().trim();
-                    if (!nomeItem) throw new Error("Descrição do item é obrigatória");
+                    let nomeItem;
+                    if (categoria === 'Alimentos') {
+                        nomeItem = (doacaoData?.doacao?.tipo_alimento ?? item ?? '').toString().trim();
+                        if (!nomeItem) throw new Error("Tipo de alimento é obrigatório");
+                    } else {
+                        nomeItem = (doacaoData?.doacao?.descricao_item ?? item ?? '').toString().trim();
+                        if (!nomeItem) throw new Error("Descrição do item é obrigatória");
+                    }
                     const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria, unidade });
                     // Validação de quantidade positiva
                     if (!qntd || Number(qntd) <= 0) {
