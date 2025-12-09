@@ -439,10 +439,6 @@ async updateStatus(req, res) {
             const totalObservacoes = Array.isArray(totObs) && totObs[0] ? Number(totObs[0].cnt) : 0;
             const [totDoa] = await conn.execute('SELECT COUNT(*) AS cnt FROM doacoes WHERE idoso_id = ?', [id]);
             const totalDoacoes = Array.isArray(totDoa) && totDoa[0] ? Number(totDoa[0].cnt) : 0;
-            if (totalDoacoes > 0) {
-                conn.release();
-                return res.status(409).json({ success: false, message: 'Não é possível excluir: há doações vinculadas a este idoso.' });
-            }
 
             await conn.beginTransaction();
 
