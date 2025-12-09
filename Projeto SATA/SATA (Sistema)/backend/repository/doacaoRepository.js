@@ -423,7 +423,7 @@ class DoacaoRepository {
                 data, tipo, obs, doador, idoso, idoso_id, evento_id) VALUES ( ?, ?, ?, ?, ?, ?, ?)`, [data, tipo, (obs ?? null), doadorId, (idosoNome ?? null), (idosoId ?? null), (eventoId ?? null)]);
                 const doacaoId = result.insertId;
                 // Validação de quantidade positiva
-                const unidadeIns = (doacaoData?.doacao?.unidade_medida ?? 'Unidade(s)');
+                const unidadeIns = (doacaoData?.doacao?.unidade_medida ?? null);
                 const qty = Number(doacaoData?.doacao?.qntd ?? doacaoData?.doacao?.quantidade ?? 0);
                 if (!qty || qty <= 0) {
                     await conn.rollback();
@@ -546,7 +546,7 @@ class DoacaoRepository {
                     const doacaoId = result.insertId;
                     // Upsert rápido de produto e obtenção de id sem múltiplos SELECTs
                     const categoria = (String(doacaoData?.tipo || '').toUpperCase() === 'A' ? 'Alimentos' : 'Outros');
-                    const unidade = (doacaoData?.doacao?.unidade_medida ?? 'Unidade(s)');
+                    const unidade = (doacaoData?.doacao?.unidade_medida ?? null);
                     const nomeItem = (item ?? '').toString().trim();
                     if (!nomeItem) throw new Error("Descrição do item é obrigatória");
                     const { id: produtoId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria, unidade });
@@ -634,7 +634,7 @@ class DoacaoRepository {
             } else {
                 await conn.execute(`UPDATE doacoes SET data = ?, tipo = ?, obs = ?, doador = ?, idoso = ?, idoso_id = ?, evento_id = ? WHERE id = ?`,
                     [data, tipo, obs, doadorId, idosoNome, idosoId, eventoId ?? null, id]);
-                const unidade = (doacaoData?.doacao?.unidade_medida ?? 'Unidade(s)');
+                const unidade = (doacaoData?.doacao?.unidade_medida ?? null);
                 const newQty = Number(doacaoData?.doacao?.qntd ?? doacaoData?.doacao?.quantidade ?? 0);
                 if (!newQty || newQty <= 0) {
                     await conn.rollback();

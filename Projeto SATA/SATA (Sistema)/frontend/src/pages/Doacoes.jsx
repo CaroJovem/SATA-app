@@ -178,7 +178,7 @@ function Doacoes() {
                 item,
                 qntd: qtd,
                 quantidade: qtd,
-                unidade_medida: doacao?.doacao?.unidade_medida ?? doacao?.unidade_medida ?? 'Unidade(s)',
+                unidade_medida: doacao?.doacao?.unidade_medida ?? doacao?.unidade_medida ?? null,
                 produto_id: doacao?.doacao?.produto_id ?? null
               };
               if (String(doacao.tipo).toUpperCase() === 'A') {

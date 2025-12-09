@@ -81,7 +81,7 @@ export default function DoacaoEditar() {
                 item,
                 qntd: qtd,
                 quantidade: qtd,
-                unidade_medida: dadosAtualizados?.doacao?.unidade_medida ?? dadosAtualizados?.unidade_medida ?? 'Unidade(s)',
+                unidade_medida: dadosAtualizados?.doacao?.unidade_medida ?? dadosAtualizados?.unidade_medida ?? null,
                 produto_id: dadosAtualizados?.doacao?.produto_id ?? null
               }
               if (tipoUp === 'A' || tipoUp === 'ALIMENTO') {

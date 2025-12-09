@@ -27,7 +27,7 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(true);
-  const [unidadeSelecionada, setUnidadeSelecionada] = useState("Unidade");
+  const [unidadeSelecionada, setUnidadeSelecionada] = useState("Unidade(s)");
   const [unidadeOutro, setUnidadeOutro] = useState("");
 
     useEffect(() => {
