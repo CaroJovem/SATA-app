@@ -5,7 +5,7 @@ const nameCache = new LRUCache(1000);
 const Doacao = require("../models/doacao");
 const { computeStockUpdate } = require("../utils/stockUpdateGuard");
 const MovimentoEstoqueRepository = require('./movimentoEstoqueRepository');
-const { resolveProduto, upsertProdutoFast } = require('../utils/produtoResolver');
+const { resolveProduto, upsertProdutoFast, normalizeName } = require('../utils/produtoResolver');
 
 let FIN_CACHE = { init: false, hasFinanceiroId: false, hasFinanceiroTable: false };
 async function ensureFinanceiroSchema(conn) {
@@ -677,30 +677,33 @@ class DoacaoRepository {
                     const nomeAlimento = String(doacaoData?.doacao?.tipo_alimento || item || prevNome);
                     await conn.execute(`UPDATE doacoes_alimentos SET tipo_alimento = ?, quantidade = ?, validade = ? WHERE doacao_id = ?`, [nomeAlimento, newQty, doacaoData?.doacao?.validade ?? null, id]);
                     const { id: prevProdId } = await upsertProdutoFast(conn, { nome: prevNome, categoria: 'Alimentos', unidade });
-                    const { id: newProdId } = await upsertProdutoFast(conn, { nome: nomeAlimento, categoria: 'Alimentos', unidade });
-                    if (prevProdId === newProdId) {
+                    const normPrev = normalizeName(prevNome);
+                    const normNew = normalizeName(nomeAlimento);
+                    if (normPrev === normNew) {
+                        await conn.execute(`UPDATE produtos SET unidade_medida = COALESCE(?, unidade_medida) WHERE id = ?`, [unidade, prevProdId]);
                         const delta = newQty - prevQty;
                         if (delta !== 0) {
-                            await conn.execute(`UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`, [delta, newProdId]);
+                            await conn.execute(`UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`, [delta, prevProdId]);
                             try {
-                                const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [newProdId]);
-                                const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : delta;
-                                const saldoAnterior = saldoPosterior - delta;
-                                await MovimentoEstoqueRepository.createWithConn(conn, {
-                                    produto_id: newProdId,
-                                    tipo: delta > 0 ? 'entrada' : 'saida',
-                                    quantidade: Math.abs(delta),
-                                    saldo_anterior: saldoAnterior,
-                                    saldo_posterior: saldoPosterior,
-                                    doacao_id: id,
-                                    responsavel_id: null,
-                                    responsavel_nome: null,
-                                    motivo: delta > 0 ? 'Ajuste de doação (entrada)' : 'Ajuste de doação (saída)',
-                                    observacao: `Atualização da doação #${id}`,
-                                });
+                              const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [prevProdId]);
+                              const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : delta;
+                              const saldoAnterior = saldoPosterior - delta;
+                              await MovimentoEstoqueRepository.createWithConn(conn, {
+                                produto_id: prevProdId,
+                                tipo: delta > 0 ? 'entrada' : 'saida',
+                                quantidade: Math.abs(delta),
+                                saldo_anterior: saldoAnterior,
+                                saldo_posterior: saldoPosterior,
+                                doacao_id: id,
+                                responsavel_id: null,
+                                responsavel_nome: null,
+                                motivo: delta > 0 ? 'Ajuste de doação (entrada)' : 'Ajuste de doação (saída)',
+                                observacao: `Atualização da doação #${id}`,
+                              });
                             } catch (_) {}
                         }
                     } else {
+                        const { id: newProdId } = await upsertProdutoFast(conn, { nome: nomeAlimento, categoria: 'Alimentos', unidade });
                         if (prevQty > 0 && prevProdId) {
                             await conn.execute(`UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`, [prevQty, prevProdId]);
                             try {
@@ -749,17 +752,19 @@ class DoacaoRepository {
                     const nomeItem = String(doacaoData?.doacao?.descricao_item || item || prevNome);
                     await conn.execute(`UPDATE doacoes_itens SET descricao_item = ?, quantidade = ?, estado_conservacao = ?, unidade_medida = ? WHERE doacao_id = ?`, [nomeItem, newQty, doacaoData?.doacao?.estado_conservacao ?? 'Bom', unidade, id]);
                     const { id: prevProdId } = await upsertProdutoFast(conn, { nome: prevNome, categoria: 'Outros', unidade });
-                    const { id: newProdId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria: 'Outros', unidade });
-                    if (prevProdId === newProdId) {
+                    const normPrev = normalizeName(prevNome);
+                    const normNew = normalizeName(nomeItem);
+                    if (normPrev === normNew) {
+                        await conn.execute(`UPDATE produtos SET unidade_medida = COALESCE(?, unidade_medida) WHERE id = ?`, [unidade, prevProdId]);
                         const delta = newQty - prevQty;
                         if (delta !== 0) {
-                            await conn.execute(`UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`, [delta, newProdId]);
+                            await conn.execute(`UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`, [delta, prevProdId]);
                             try {
-                                const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [newProdId]);
+                                const [afterRows] = await conn.execute(`SELECT quantidade FROM produtos WHERE id = ?`, [prevProdId]);
                                 const saldoPosterior = Array.isArray(afterRows) && afterRows.length ? Number(afterRows[0].quantidade) : delta;
                                 const saldoAnterior = saldoPosterior - delta;
                                 await MovimentoEstoqueRepository.createWithConn(conn, {
-                                    produto_id: newProdId,
+                                    produto_id: prevProdId,
                                     tipo: delta > 0 ? 'entrada' : 'saida',
                                     quantidade: Math.abs(delta),
                                     saldo_anterior: saldoAnterior,
@@ -773,6 +778,7 @@ class DoacaoRepository {
                             } catch (_) {}
                         }
                     } else {
+                        const { id: newProdId } = await upsertProdutoFast(conn, { nome: nomeItem, categoria: 'Outros', unidade });
                         if (prevQty > 0 && prevProdId) {
                             await conn.execute(`UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`, [prevQty, prevProdId]);
                             try {
