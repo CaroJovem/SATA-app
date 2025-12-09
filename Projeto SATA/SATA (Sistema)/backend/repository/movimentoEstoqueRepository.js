@@ -84,6 +84,27 @@ const MovimentoEstoqueRepository = {
     ];
     try {
       const [result] = await db.execute(sql, params);
+      try {
+        const [pRows] = await db.execute('SELECT id, nome, quantidade, estoque_minimo FROM produtos WHERE id = ?', [mov.produto_id]);
+        const p = Array.isArray(pRows) && pRows.length ? pRows[0] : null;
+        if (p) {
+          const current = Number(p.quantidade || 0);
+          const minimo = Number(p.estoque_minimo || 0);
+          if (minimo > 0 && current <= minimo) {
+            const [recent] = await db.execute(
+              `SELECT id FROM notificacoes WHERE referencia_tipo='produto' AND referencia_id=? AND tipo='estoque_baixo' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 1 HOUR) ORDER BY id DESC LIMIT 1`,
+              [mov.produto_id]
+            );
+            const hasRecent = Array.isArray(recent) && recent.length > 0;
+            if (!hasRecent) {
+              const Notificacao = require('../models/notificacao');
+              const NotificacaoRepository = require('./notificacaoRepository');
+              const notif = Notificacao.criarNotificacaoEstoqueBaixo({ id: p.id, nome: p.nome, estoque_atual: current, estoque_minimo: minimo }, null);
+              try { await NotificacaoRepository.create(notif); } catch (_) {}
+            }
+          }
+        }
+      } catch (_) {}
       return result.insertId;
     } catch (err) {
       const msg = String(err?.message || '');
@@ -116,6 +137,40 @@ const MovimentoEstoqueRepository = {
     ];
     try {
       const [result] = await conn.execute(sql, params);
+      try {
+        const [pRows] = await conn.execute('SELECT id, nome, quantidade, estoque_minimo FROM produtos WHERE id = ?', [mov.produto_id]);
+        const p = Array.isArray(pRows) && pRows.length ? pRows[0] : null;
+        if (p) {
+          const current = Number(p.quantidade || 0);
+          const minimo = Number(p.estoque_minimo || 0);
+          if (minimo > 0 && current <= minimo) {
+            const [recent] = await conn.execute(
+              `SELECT id FROM notificacoes WHERE referencia_tipo='produto' AND referencia_id=? AND tipo='estoque_baixo' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 1 HOUR) ORDER BY id DESC LIMIT 1`,
+              [mov.produto_id]
+            );
+            const hasRecent = Array.isArray(recent) && recent.length > 0;
+            if (!hasRecent) {
+              const Notificacao = require('../models/notificacao');
+              const notif = Notificacao.criarNotificacaoEstoqueBaixo({ id: p.id, nome: p.nome, estoque_atual: current, estoque_minimo: minimo }, null);
+              try {
+                await conn.execute(
+                  `INSERT INTO notificacoes (tipo, titulo, descricao, prioridade, lida, usuario_id, referencia_id, referencia_tipo, data_criacao) VALUES (?,?,?,?,?,?,?,? , NOW())`,
+                  [
+                    notif.tipo,
+                    notif.titulo,
+                    notif.descricao,
+                    notif.prioridade,
+                    notif.lida,
+                    notif.usuario_id,
+                    notif.referencia_id,
+                    notif.referencia_tipo,
+                  ]
+                );
+              } catch (_) {}
+            }
+          }
+        }
+      } catch (_) {}
       return result.insertId;
     } catch (err) {
       const msg = String(err?.message || '');
