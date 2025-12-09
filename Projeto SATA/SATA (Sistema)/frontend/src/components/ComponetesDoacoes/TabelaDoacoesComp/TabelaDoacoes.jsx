@@ -66,9 +66,7 @@ function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef:
   const renderCategoria = (d) => {
     const t = String(d?.tipo || '').toUpperCase();
     if (t === 'D' || t === 'DINHEIRO') {
-      const v = d?.doacao?.valor ?? d?.valor;
-      const n = Number(v);
-      return Number.isFinite(n) ? `Dinheiro - R$ ${n.toFixed(2)}` : 'Dinheiro';
+      return 'Dinheiro';
     }
     // Deriva pela presença dos campos quando tipo não está padronizado
     if (t === 'A' || t === 'ALIMENTO' || d?.doacao?.tipo_alimento || d?.tipo_alimento) return 'Alimento';
@@ -86,6 +84,12 @@ function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef:
 
   // Ordenação e filtros (removidos)
   const filteredItems = items;
+  const allMoney = Array.isArray(filteredItems) && filteredItems.length > 0
+    ? filteredItems.every((d) => {
+        const t = String(d?.tipo || '').toUpperCase();
+        return t === 'D' || t === 'DINHEIRO';
+      })
+    : false;
 
   const renderValorQuant = (d) => {
     const tipo = String(d?.tipo || '').toUpperCase();
@@ -123,7 +127,7 @@ function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef:
                   <th>Nome</th>
                   <th>Categoria</th>
                   <th>Estado</th>
-                  <th>Valor/Quant</th>
+                  <th>{allMoney ? 'Valor' : 'Valor/Quant'}</th>
                   {!isHidden('validade') && <th>Validade</th>}
                   {!isHidden('idoso') && <th>Idoso</th>}
                   <th>Doador</th>

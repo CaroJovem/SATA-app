@@ -40,7 +40,7 @@ export default function Eventos() {
     local: '',
     descricao: '',
     notificar: false,
-    tempoNotificacao: 60,
+    tempoNotificacao: 1440,
   });
 
   // Filtros
@@ -374,7 +374,7 @@ export default function Eventos() {
       local: props.local || '',
       descricao: props.descricao || '',
       notificar: !!props.notificar,
-      tempoNotificacao: props.tempoNotificacao || 60,
+      tempoNotificacao: props.tempoNotificacao || 1440,
     });
     setShowModal(true);
   }
@@ -415,7 +415,7 @@ export default function Eventos() {
 
   function limparForm() {
     setFormData({
-      titulo: '', tipo: 'Geral', cor: '#3788d8', dataInicio: '', dataFim: '', horaInicio: '', horaFim: '', local: '', descricao: '', notificar: false, tempoNotificacao: 60
+      titulo: '', tipo: 'Geral', cor: '#3788d8', dataInicio: '', dataFim: '', horaInicio: '', horaFim: '', local: '', descricao: '', notificar: false, tempoNotificacao: 1440
     });
   }
 
@@ -917,9 +917,8 @@ export default function Eventos() {
                           value={formData.tempoNotificacao}
                           onChange={e => setFormData({ ...formData, tempoNotificacao: Number(e.target.value) })}
                         >
-                          <option value={30}>30 minutos antes</option>
-                          <option value={60}>1 hora antes</option>
-                          <option value={180}>3 horas antes</option>
+                          <option value={43200}>30 dias antes</option>
+                          <option value={10080}>7 dias antes</option>
                           <option value={1440}>1 dia antes</option>
                         </Form.Select>
                       )}
