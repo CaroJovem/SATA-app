@@ -6,6 +6,7 @@ async function main() {
     require('./rooms.delete.history.preserve.test'),
     require('./donors.create.validation.test'),
     require('./donations.tojson.test'),
+    require('./internacoes.history.snapshot.test'),
   ];
   for (const t of tests) {
     await t();

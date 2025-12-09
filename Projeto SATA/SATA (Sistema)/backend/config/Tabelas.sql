@@ -136,6 +136,8 @@ CREATE TABLE `internacoes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `idoso_id` int(11) NOT NULL,
   `quarto_id` int(11) NOT NULL,
+  `quarto_numero` varchar(10) DEFAULT NULL,
+  `quarto_descricao` varchar(255) DEFAULT NULL,
   `cama` varchar(10) NOT NULL,
   `data_entrada` date NOT NULL,
   `data_saida` date DEFAULT NULL,

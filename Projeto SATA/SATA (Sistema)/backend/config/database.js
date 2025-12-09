@@ -217,6 +217,26 @@ async function ensureTriggers() {
     return `CONCAT('${capitalize(l)} ${g === 'f' ? 'removida' : 'removido'}')`;
   }
   try {
+    try {
+      const [rows] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA=? AND TRIGGER_NAME='tr_quartos_before_delete_archive'`,
+        [DB_NAME]
+      );
+      const exists = Number(rows?.[0]?.cnt || 0) > 0;
+      if (!exists) {
+        try {
+          const sql = `CREATE TRIGGER tr_quartos_before_delete_archive BEFORE DELETE ON quartos FOR EACH ROW BEGIN UPDATE internacoes SET quarto_numero = IFNULL(quarto_numero, OLD.numero), quarto_descricao = IFNULL(quarto_descricao, OLD.descricao) WHERE quarto_id = OLD.id; END`;
+          await conn.query(sql);
+          created.push('tr_quartos_before_delete_archive');
+        } catch (e) {
+          errors.push({ trigger: 'tr_quartos_before_delete_archive', error: e.message });
+        }
+      } else {
+        existing.push('tr_quartos_before_delete_archive');
+      }
+    } catch (e) {
+      errors.push({ trigger: 'tr_quartos_before_delete_archive_check', error: e.message });
+    }
     for (const t of tables) {
       const allowUpdate = new Set(['doadores','produtos','financeiro','eventos','idosos','quartos','doacoes','users']).has(t);
       const allowDelete = new Set(['doadores','produtos','financeiro','eventos','idosos','quartos','doacoes','users']).has(t);
@@ -300,6 +320,37 @@ async function ensureIntegrity() {
       } catch (e) {
         errors.push({ action: 'produtos.add_column_preco', error: e.message });
       }
+    }
+
+    try {
+      const [colQNumRows] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='internacoes' AND COLUMN_NAME='quarto_numero'`,
+        [DB_NAME]
+      );
+      const hasQNum = Number(colQNumRows?.[0]?.cnt || 0) > 0;
+      if (!hasQNum) {
+        try {
+          await conn.query(`ALTER TABLE internacoes ADD COLUMN quarto_numero varchar(10) DEFAULT NULL AFTER quarto_id`);
+          changes.push('internacoes.add_column_quarto_numero');
+        } catch (e) {
+          errors.push({ action: 'internacoes.add_column_quarto_numero', error: e.message });
+        }
+      }
+      const [colQDescRows] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='internacoes' AND COLUMN_NAME='quarto_descricao'`,
+        [DB_NAME]
+      );
+      const hasQDesc = Number(colQDescRows?.[0]?.cnt || 0) > 0;
+      if (!hasQDesc) {
+        try {
+          await conn.query(`ALTER TABLE internacoes ADD COLUMN quarto_descricao varchar(255) DEFAULT NULL AFTER quarto_numero`);
+          changes.push('internacoes.add_column_quarto_descricao');
+        } catch (e) {
+          errors.push({ action: 'internacoes.add_column_quarto_descricao', error: e.message });
+        }
+      }
+    } catch (e) {
+      errors.push({ action: 'internacoes.ensure_quarto_snapshot_columns', error: e.message });
     }
 
     const [colQtdRows] = await conn.query(

@@ -6,13 +6,13 @@ class InternacaoRepository {
             const [rows] = await db.query(`
                 SELECT 
                     i.*, 
-                    ido.nome as idoso_nome,
-                    ido.cpf as idoso_cpf,
-                    q.numero as quarto_numero,
-                    q.capacidade as quarto_capacidade
+                    ido.nome AS idoso_nome,
+                    ido.cpf AS idoso_cpf,
+                    COALESCE(i.quarto_numero, q.numero) AS quarto_numero,
+                    q.capacidade AS quarto_capacidade
                 FROM internacoes i
                 JOIN idosos ido ON i.idoso_id = ido.id
-                JOIN quartos q ON i.quarto_id = q.id
+                LEFT JOIN quartos q ON i.quarto_id = q.id
                 ORDER BY i.data_entrada DESC
             `);
             return rows;
@@ -26,13 +26,13 @@ class InternacaoRepository {
             const [rows] = await db.execute(`
                 SELECT 
                     i.*, 
-                    ido.nome as idoso_nome,
-                    ido.cpf as idoso_cpf,
-                    q.numero as quarto_numero,
-                    q.capacidade as quarto_capacidade
+                    ido.nome AS idoso_nome,
+                    ido.cpf AS idoso_cpf,
+                    COALESCE(i.quarto_numero, q.numero) AS quarto_numero,
+                    q.capacidade AS quarto_capacidade
                 FROM internacoes i
                 JOIN idosos ido ON i.idoso_id = ido.id
-                JOIN quartos q ON i.quarto_id = q.id
+                LEFT JOIN quartos q ON i.quarto_id = q.id
                 WHERE i.id = ?
             `, [id]);
             return rows.length > 0 ? rows[0] : null;
@@ -133,10 +133,10 @@ class InternacaoRepository {
             const [rows] = await db.execute(`
                 SELECT 
                     i.*, 
-                    q.numero as quarto_numero,
-                    q.capacidade as quarto_capacidade
+                    COALESCE(i.quarto_numero, q.numero) AS quarto_numero,
+                    q.capacidade AS quarto_capacidade
                 FROM internacoes i
-                JOIN quartos q ON i.quarto_id = q.id
+                LEFT JOIN quartos q ON i.quarto_id = q.id
                 WHERE i.idoso_id = ? 
                 ORDER BY i.data_entrada DESC
             `, [usuarioId]);
