@@ -238,7 +238,7 @@ async function ensureTriggers() {
       errors.push({ trigger: 'tr_quartos_before_delete_archive_check', error: e.message });
     }
     for (const t of tables) {
-      const allowUpdate = new Set(['doadores','produtos','financeiro','eventos','idosos','quartos','doacoes','users']).has(t);
+      const allowUpdate = new Set(['doadores','produtos','financeiro','eventos','idosos','quartos','doacoes']).has(t);
       const allowDelete = new Set(['doadores','produtos','financeiro','eventos','idosos','quartos','doacoes','users']).has(t);
       const trigDefs = [
         { name: `tr_${t}_after_insert_notify`, timing: 'AFTER', event: 'INSERT', ref: 'NEW' },
