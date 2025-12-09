@@ -11,7 +11,6 @@ function FormDoador({ onSubmit, doadores }) {
     nome: "",
     cpf: "",
     cnpj: "",
-    representante: "",
     telefone: "",
     rg: "",
     email: "",
@@ -30,7 +29,6 @@ function FormDoador({ onSubmit, doadores }) {
       nome: "",
       cpf: "",
       cnpj: "",
-      representante: "",
       telefone: "",
       rg: "",
       email: "",
@@ -61,7 +59,7 @@ function FormDoador({ onSubmit, doadores }) {
     setDoador(prev => ({ ...prev, tipo }));
     // Limpa documentos do outro tipo para evitar validação/duplicidade indevida
     if (tipo === 'PF') {
-      setDoador(prev => ({ ...prev, cnpj: "", representante: "" }));
+      setDoador(prev => ({ ...prev, cnpj: "" }));
     } else {
       setDoador(prev => ({ ...prev, cpf: "" }));
     }
@@ -118,16 +116,7 @@ function FormDoador({ onSubmit, doadores }) {
 
   
 
-  const handleChangeRepresentante = (e) => {
-    const value = e.target.value;
-    setDoador(prev => ({ ...prev, representante: value }));
-    if (!value || !value.trim()) {
-      setErrors(prev => ({ ...prev, representante: "Representante legal é obrigatório" }));
-      setValidated(false);
-    } else {
-      setErrors(prev => ({ ...prev, representante: null }));
-    }
-  };
+  
 
   const handleChangeTelefone = (e) => {
     let value = e.target.value;
@@ -261,10 +250,6 @@ function FormDoador({ onSubmit, doadores }) {
         newErrors.cnpj = "CNPJ inválido";
         setValidated(false);
       }
-      if (!doador.representante || !doador.representante.trim()) {
-        newErrors.representante = "Representante legal é obrigatório";
-        setValidated(false);
-      }
     }
 
     if (!doador.telefone) {
@@ -395,17 +380,6 @@ function FormDoador({ onSubmit, doadores }) {
                         placeholder="12.345.678/0001-90" 
                       />
                       <Form.Control.Feedback type="invalid">{errors.cnpj}</Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="representante">
-                      <Form.Label>Representante Legal</Form.Label>
-                      <Form.Control 
-                        value={doador.representante}
-                        onChange={handleChangeRepresentante}
-                        isInvalid={!!errors.representante}
-                        required
-                        placeholder="Nome do representante"
-                      />
-                      <Form.Control.Feedback type="invalid">{errors.representante}</Form.Control.Feedback>
                     </Form.Group>
                   </>
                 )}

@@ -112,7 +112,7 @@ export default function DoadorFicha() {
   const { dadosPessoais, historicoDoacoes } = ficha;
   const docCPF = dadosPessoais?.documentos?.cpf || '';
   const docCNPJ = dadosPessoais?.documentos?.cnpj || '';
-  const representante = dadosPessoais?.representante || '';
+  
 
   const renderCPF = (cpf) => {
     const v = String(cpf || '').trim();
@@ -164,9 +164,7 @@ export default function DoadorFicha() {
                 <tr><th>RG</th><td>{dadosPessoais?.documentos?.rg ?? '—'}</td></tr>
                 <tr><th>CPF</th><td>{renderCPF(docCPF)}</td></tr>
                 <tr><th>CNPJ</th><td>{renderCNPJ(docCNPJ)}</td></tr>
-                {docCNPJ ? (
-                  <tr><th>Representante</th><td>{representante ? representante : '—'}</td></tr>
-                ) : null}
+                
                 <tr>
                   <th>Endereço</th>
                   <td>
