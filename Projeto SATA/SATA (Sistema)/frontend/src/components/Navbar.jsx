@@ -105,7 +105,7 @@ const Navbar = ({ children, disableSidebar = false, sidebarInactive = false, sid
               </li>
               <li>
                 <Link to="/internacoes" className="nav-item" onClick={closeOnNavigate}>
-                  <Building className="me-2" size={18} /> <span className="label">Internações</span>
+                  <Building className="me-2" size={18} /> <span className="label">Institucionalizações</span>
                 </Link>
               </li>
               <li>
@@ -207,7 +207,7 @@ const Navbar = ({ children, disableSidebar = false, sidebarInactive = false, sid
             </li>
             <li>
               <Link to="/internacoes" className="nav-item" onClick={closeOnNavigate}>
-                <Building className="me-2" size={18} /> <span className="label">Internações</span>
+                <Building className="me-2" size={18} /> <span className="label">Institucionalizações</span>
               </Link>
             </li>
             <li>

@@ -5,7 +5,7 @@ import { PeopleFill, BoxSeam, CalendarEvent, DoorClosed, BellFill, CashStack } f
 
 const actions = [
   { to: '/idosos', label: 'Gerenciar Idosos', icon: <PeopleFill /> },
-  { to: '/internacoes', label: 'Internações', icon: <DoorClosed /> },
+  { to: '/internacoes', label: 'Institucionalizações', icon: <DoorClosed /> },
   { to: '/quartos', label: 'Quartos', icon: <DoorClosed /> },
   { to: '/eventos', label: 'Eventos', icon: <CalendarEvent /> },
   { to: '/produtos', label: 'Estoque', icon: <BoxSeam /> },

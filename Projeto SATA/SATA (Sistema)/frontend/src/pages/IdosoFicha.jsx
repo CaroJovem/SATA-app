@@ -218,9 +218,9 @@ export default function IdosoFicha() {
             {/* Histórico de quartos removido para evitar duplicação com "Histórico de internações" */}
           </section>
 
-          {/* Histórico de internações — seção própria após Acomodação */}
+          {/* Histórico de institucionalizações — seção própria após Acomodação */}
           <section className="ficha-section" aria-labelledby="sec-internacoes">
-            <h3 id="sec-internacoes">Histórico de internações</h3>
+            <h3 id="sec-internacoes">Histórico de institucionalizações</h3>
             <table className="ficha-table mt-1">
               <thead>
                 <tr>

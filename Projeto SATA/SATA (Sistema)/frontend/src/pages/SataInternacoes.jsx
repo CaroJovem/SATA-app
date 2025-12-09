@@ -1,4 +1,4 @@
-// Página de gestão de internações de idosos
+// Página de gestão de institucionalizações de idosos
 import React, { useState, useEffect } from 'react';
 import { 
   Container, 
@@ -149,7 +149,7 @@ const SataInternacoes = () => {
         quarto_id: novaInternacao.quartoId,
         cama: novaInternacao.cama,
         data_entrada: novaInternacao.dataEntrada,
-        motivo_entrada: 'Internação regular'
+        motivo_entrada: 'Institucionalização regular'
       };
       
       await internacaoService.criar(internacaoData);
@@ -163,8 +163,8 @@ const SataInternacoes = () => {
       });
       setCamasDisponiveis([]);
     } catch (error) {
-      console.error('Erro ao criar internação:', error);
-      alert('Erro ao criar internação: ' + error.message);
+      console.error('Erro ao criar institucionalização:', error);
+      alert('Erro ao criar institucionalização: ' + error.message);
     } finally {
       setSalvando(false);
     }
@@ -266,7 +266,7 @@ const SataInternacoes = () => {
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Carregando...</span>
           </Spinner>
-          <p className="mt-2">Carregando internações...</p>
+          <p className="mt-2">Carregando institucionalizações...</p>
         </Container>
       </Navbar>
     );
@@ -297,11 +297,11 @@ const SataInternacoes = () => {
             <div>
               <h2 className="page-title">
                 <Building className="me-2" />
-                Internações
+                Institucionalizações
                 <span className="ms-2 d-inline-flex align-items-center"><HelpButton inline iconOnly /></span>
               </h2>
               <p className="page-subtitle">
-                Gerencie as internações dos idosos da instituição
+                Gerencie as institucionalizações dos idosos da instituição
               </p>
             </div>
             <div className="d-flex gap-2">
@@ -319,10 +319,10 @@ const SataInternacoes = () => {
                 onClick={() => isAdmin && setMostrarModalNova(true)}
                 className={`btn-action ${!isAdmin ? 'disabled-action' : ''}`}
                 disabled={!isAdmin}
-                title={!isAdmin ? 'Apenas Administradores podem criar internações' : 'Nova Internação'}
+                title={!isAdmin ? 'Apenas Administradores podem institucionalizar' : 'Nova Institucionalização'}
               >
                 <PlusCircle className="me-2" />
-                Nova Internação
+                Nova Institucionalização
               </Button>
             </div>
           </div>
@@ -341,9 +341,9 @@ const SataInternacoes = () => {
                         onChange={(e) => setFiltroStatus(e.target.value)}
                         className="form-control-sm"
                       >
-                        <option value="ativas">Internações Ativas</option>
-                        <option value="finalizadas">Internações Finalizadas</option>
-                        <option value="todas">Todas as Internações</option>
+                        <option value="ativas">Institucionalizações Ativas</option>
+                        <option value="finalizadas">Institucionalizações Finalizadas</option>
+                        <option value="todas">Todas as Institucionalizações</option>
                       </Form.Select>
                     </div>
                     <div className="flex-grow-1">
@@ -381,7 +381,7 @@ const SataInternacoes = () => {
               <Card className="stats-card text-center">
                 <Card.Body>
                   <h5 className="mb-1">{internacoes.filter(i => i.status === 'ativa').length}</h5>
-                  <small className="text-muted">Internações Ativas</small>
+                  <small className="text-muted">Institucionalizações Ativas</small>
                 </Card.Body>
               </Card>
             </Col>
@@ -389,7 +389,7 @@ const SataInternacoes = () => {
               <Card className="stats-card text-center">
                 <Card.Body>
                   <h5 className="mb-1">{internacoes.filter(i => i.status === 'finalizada').length}</h5>
-                  <small className="text-muted">Internações Finalizadas</small>
+                  <small className="text-muted">Institucionalizações Finalizadas</small>
                 </Card.Body>
               </Card>
             </Col>
@@ -397,7 +397,7 @@ const SataInternacoes = () => {
               <Card className="stats-card text-center">
                 <Card.Body>
                   <h5 className="mb-1">{internacoes.length}</h5>
-                  <small className="text-muted">Total de Internações</small>
+                  <small className="text-muted">Total de Institucionalizações</small>
                 </Card.Body>
               </Card>
             </Col>
@@ -408,9 +408,9 @@ const SataInternacoes = () => {
             <Card className="text-center py-5">
               <Card.Body>
                 <Building size={48} className="text-muted mb-3" />
-                <h5 className="text-muted">Nenhuma internação encontrada</h5>
+                <h5 className="text-muted">Nenhuma institucionalização encontrada</h5>
                 <p className="text-muted">
-                  {termoBusca ? 'Tente ajustar os filtros de busca.' : 'Não há internações cadastradas no momento.'}
+                  {termoBusca ? 'Tente ajustar os filtros de busca.' : 'Não há institucionalizações cadastradas no momento.'}
                 </p>
               </Card.Body>
             </Card>
@@ -489,7 +489,7 @@ const SataInternacoes = () => {
             <Modal.Header>
               <Modal.Title>
                 <PlusCircle className="me-2" />
-                Nova Internação
+                Nova Institucionalização
               </Modal.Title>
             </Modal.Header>
             <Form onSubmit={handleNovaInternacao}>
@@ -573,7 +573,7 @@ const SataInternacoes = () => {
               <Modal.Title>Confirmar Baixa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              Tem certeza que deseja dar baixa na internação de <strong>{internacaoSelecionada?.idoso_id && obterNomeIdoso(internacaoSelecionada.idoso_id)}</strong>?
+              Tem certeza que deseja dar baixa na institucionalização de <strong>{internacaoSelecionada?.idoso_id && obterNomeIdoso(internacaoSelecionada.idoso_id)}</strong>?
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setMostrarModalBaixa(false)} disabled={salvando}>

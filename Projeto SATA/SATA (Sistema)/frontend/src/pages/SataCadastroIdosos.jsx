@@ -212,11 +212,11 @@ const SataCadastroIdosos = () => {
           ...formData,
           status: 'internado'
         });
-        alert('Dados de internação atualizados com sucesso!');
+        alert('Dados de institucionalização atualizados com sucesso!');
         navigate('/idosos');
       } catch (error) {
-        console.error('Erro ao salvar internação:', error);
-        alert('Erro ao salvar os dados de internação. Por favor, tente novamente.');
+        console.error('Erro ao salvar institucionalização:', error);
+        alert('Erro ao salvar os dados de institucionalização. Por favor, tente novamente.');
       } finally {
         setSalvando(false);
       }
@@ -247,7 +247,7 @@ const SataCadastroIdosos = () => {
       <div className="content-area full-main">
         <Container fluid className="container-principal">
           <PageHeader
-            title={editandoInternacao ? 'Editar Internação' : (estaEditando ? 'Editar Idoso' : 'Cadastro de Idoso')}
+            title={editandoInternacao ? 'Editar Institucionalização' : (estaEditando ? 'Editar Idoso' : 'Cadastro de Idoso')}
             icon={!editandoInternacao && !estaEditando ? <FileEarmarkText /> : null}
             actions={
               <Button 
@@ -269,7 +269,7 @@ const SataCadastroIdosos = () => {
 
           {submetidoInternacao && Object.keys(errosInternacao).length > 0 && (
             <Alert variant="danger" className="mb-4">
-              Por favor, corrija os erros no formulário de internação antes de enviar.
+              Por favor, corrija os erros no formulário de institucionalização antes de enviar.
             </Alert>
           )}
 
@@ -497,7 +497,7 @@ const SataCadastroIdosos = () => {
             {editandoInternacao && (
               <Card className="mb-4 secao-formulario">
                 <Card.Header>
-                  <Hospital className="me-2" /> Dados de Internação
+                  <Hospital className="me-2" /> Dados de Institucionalização
                 </Card.Header>
                 <Card.Body>
                   <Row>
@@ -581,7 +581,7 @@ const SataCadastroIdosos = () => {
                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
                     <span className="ms-2">Salvando...</span>
                   </>
-                ) : editandoInternacao ? 'Salvar Internação' : 
+                ) : editandoInternacao ? 'Salvar Institucionalização' : 
                    estaEditando ? 'Atualizar Cadastro' : 'Salvar Cadastro'}
               </Button>
             </div>

@@ -10,11 +10,11 @@ const StatusBadge = ({ status }) => {
     // Idoso
     case 'internado':
       variant = 'info';
-      label = 'Internado';
+      label = 'Institucionalizado';
       break;
     case 'nao_internado':
       variant = 'secondary';
-      label = 'Não Internado';
+      label = 'Não Institucionalizado';
       break;
     // Quarto
     case 'disponivel':

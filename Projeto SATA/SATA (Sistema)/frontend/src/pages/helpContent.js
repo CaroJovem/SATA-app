@@ -29,9 +29,9 @@ const helpContent = {
     sections: [
       { title: 'Botões e ações', items: [
         'Novo Idoso: inicia o cadastro de um novo residente com dados obrigatórios.',
-        'Internações: abre a página de internações que serve para acompanhar e criar internações de um idoso cadastrado.',
+        'Institucionalizações: abre a página de institucionalizações que serve para acompanhar e criar institucionalizações de um idoso cadastrado.',
         'Editar (lápis): permite alterar dados do idoso selecionado.',
-        'Dar Baixa (seta): altera o status de internado para não internado.',
+        'Dar Baixa (seta): altera o status de institucionalizado para não institucionalizado.',
         'Excluir (lixeira): remove o registro do idoso após confirmação.',
         'Detalhes (olho): abre a ficha com as informações completas do idoso.',
         'Observações: registra anotações associadas ao idoso.'
@@ -39,13 +39,13 @@ const helpContent = {
     ]
   },
   '/internacoes': {
-    title: 'Internações',
+    title: 'Institucionalizações',
     intro: 'Registre entradas e saídas com vínculo de quarto e período.',
     sections: [
       { title: 'Botões e ações', items: [
-        'Nova Internação: cria internação selecionando idoso, quarto e datas.',
-        'Dar Baixa: finaliza uma internação e atualiza o status.',
-        'Status: filtra por Internações Ativas, Finalizadas ou Todas.'
+        'Nova Institucionalização: cria institucionalização selecionando idoso, quarto e datas.',
+        'Dar Baixa: finaliza uma institucionalização e atualiza o status.',
+        'Status: filtra por Institucionalizações Ativas, Finalizadas ou Todas.'
       ]}
     ]
   },

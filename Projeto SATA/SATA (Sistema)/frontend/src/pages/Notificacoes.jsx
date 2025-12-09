@@ -200,6 +200,27 @@ const Notificacoes = () => {
     }
   };
 
+  const aplicarTerminologia = (t) => {
+    if (!t) return t;
+    const repl = (src, re, to) => src.replace(re, (m) => {
+      const isUpper = m === m.toUpperCase();
+      const isLower = m === m.toLowerCase();
+      const isCapital = m[0] === m[0].toUpperCase() && m.slice(1) === m.slice(1).toLowerCase();
+      let out = to;
+      if (isUpper) out = to.toUpperCase();
+      else if (isLower) out = to.toLowerCase();
+      else if (isCapital) out = to[0].toUpperCase() + to.slice(1).toLowerCase();
+      return out;
+    });
+    let s = String(t);
+    s = repl(s, /\b[Ii]nterna[cç][aã]c[õo]es\b/g, 'Institucionalizações');
+    s = repl(s, /\b[Ii]nterna[cç][aã]o\b/g, 'Institucionalização');
+    s = repl(s, /\b[Ii]nternados\b/g, 'Institucionalizados');
+    s = repl(s, /\b[Ii]nternado\b/g, 'Institucionalizado');
+    s = repl(s, /\b[Ii]nternar\b/g, 'Institucionalizar');
+    return s;
+  };
+
   return (
     <Navbar>
       <Container fluid className="p-3">
@@ -362,7 +383,7 @@ const Notificacoes = () => {
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
                             <h6 className="mb-1 d-flex align-items-center gap-2">
-                              {notificacao.titulo}
+                              {aplicarTerminologia(notificacao.titulo)}
                               <Badge bg={obterVariantePrioridade(notificacao.prioridade)} size="sm">
                                 {notificacao.prioridade}
                               </Badge>
@@ -373,7 +394,7 @@ const Notificacoes = () => {
                                 <Badge bg="primary" size="sm">Nova</Badge>
                               )}
                             </h6>
-                            <p className="mb-1 text-muted">{notificacao.descricao}</p>
+                            <p className="mb-1 text-muted">{aplicarTerminologia(notificacao.descricao)}</p>
                             <small className="text-muted">
                               {formatarData(notificacao.data_criacao)}
                             </small>

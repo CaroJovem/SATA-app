@@ -22,7 +22,7 @@ export default function Home() {
   // Grade de ações disponíveis por módulo; controlada por papel
   const actions = useMemo(() => ([
     { to: '/idosos', label: 'Idosos', icon: <PeopleFill />, desc: 'Listar e gerenciar idosos', variant: 'primary', roles: ['Admin', 'Funcionário'] },
-    { to: '/internacoes', label: 'Internações', icon: <Building />, desc: 'Acompanhar internações ativas', variant: 'purple', roles: ['Admin', 'Funcionário'] },
+    { to: '/internacoes', label: 'Institucionalizações', icon: <Building />, desc: 'Acompanhar institucionalizações ativas', variant: 'purple', roles: ['Admin', 'Funcionário'] },
     { to: '/quartos', label: 'Quartos', icon: <DoorClosed />, desc: 'Ver ocupação e disponibilidade', variant: 'teal', roles: ['Admin', 'Funcionário'] },
     { to: '/eventos', label: 'Eventos', icon: <CalendarEvent />, desc: 'Agendar e gerenciar eventos', variant: 'success', roles: ['Admin', 'Funcionário'] },
     { to: '/produtos', label: 'Estoque', icon: <BoxSeam />, desc: 'Controlar produtos e saldo', variant: 'orange', roles: ['Admin', 'Funcionário'] },
@@ -144,7 +144,7 @@ export default function Home() {
   // Mapeamento das métricas para cartões exibidos
   const stats = useMemo(() => ([
     { title: 'Idosos ativos', value: metricas.idososAtivos ?? '—', icon: <PeopleFill />, variant: 'primary' },
-    { title: 'Internações em andamento', value: metricas.internacoesAtivas ?? '—', icon: <DoorClosed />, variant: 'purple' },
+    { title: 'Institucionalizações em andamento', value: metricas.internacoesAtivas ?? '—', icon: <DoorClosed />, variant: 'purple' },
     { title: 'Eventos este mês', value: metricas.eventosMes ?? '—', icon: <CalendarEvent />, variant: 'success' },
     { title: 'Saldo do mês', value: metricas.saldoFinanceiro != null ? formatBRL(metricas.saldoFinanceiro) : '—', icon: <CashStack />, variant: 'teal' },
     { title: 'Itens em baixa', value: metricas.itensBaixa ?? '—', icon: <BoxSeam />, variant: 'orange' },
@@ -160,7 +160,7 @@ export default function Home() {
               <h1 className="welcome-title">Bem-vindo, {user?.username || 'Usuário'}!</h1>
               <p className="welcome-subtitle">
                 O SATA é um sistema de gestão integrado para instituições de acolhimento,
-                reunindo cadastros de idosos, internações e quartos, agenda de eventos,
+                reunindo cadastros de idosos, institucionalizações e quartos, agenda de eventos,
                 controle de estoque e doações, além de financeiro e notificações. Tudo em
                 um painel unificado, com indicadores em tempo real e operações seguras
                 para a equipe.

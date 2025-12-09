@@ -94,7 +94,7 @@ const abrirDetalhes = (quarto) => {
     // Validação pré-exclusão no cliente: bloquear se status ocupado
     if (String(quartoParaExcluir.status).toLowerCase() === 'ocupado') {
       setTipoMensagemExclusao('warning');
-      setMensagemExclusao('Não é possível excluir quarto com pacientes internados');
+      setMensagemExclusao('Não é possível excluir quarto com pacientes institucionalizados');
       setMostrarModalExclusao(false);
       return;
     }
@@ -113,7 +113,7 @@ const abrirDetalhes = (quarto) => {
       const msg = e?.response?.data?.message || 'Ocorreu um erro durante a exclusão';
       if (status === 409) {
         setTipoMensagemExclusao('warning');
-        setMensagemExclusao(msg || 'Não é possível excluir quarto com pacientes internados');
+        setMensagemExclusao(msg || 'Não é possível excluir quarto com pacientes institucionalizados');
       } else {
         setTipoMensagemExclusao('danger');
         setMensagemExclusao(msg);
@@ -289,7 +289,7 @@ const abrirDetalhes = (quarto) => {
                   )}
                   {quartoParaExcluir && String(quartoParaExcluir.status).toLowerCase() === 'ocupado' && (
                     <Alert variant="warning" className="mt-2" role="alert">
-                      Não é possível excluir quarto com pacientes internados
+                      Não é possível excluir quarto com pacientes institucionalizados
                     </Alert>
                   )}
                 </Modal.Body>

@@ -221,9 +221,9 @@ const SataListaIdosos = () => {
                 <Button 
                   variant="success"
                   onClick={() => navigate('/internacoes')}
-                  aria-label="Gerenciar internações"
+                  aria-label="Gerenciar institucionalizações"
                 >
-                  <Building className="me-1" /> Internações
+                  <Building className="me-1" /> Institucionalizações
                 </Button>
               </>
             }
@@ -259,8 +259,8 @@ const SataListaIdosos = () => {
                         aria-label="Filtrar por status"
                       >
                         <option value="">Todos</option>
-                        <option value="internado">Internados</option>
-                        <option value="nao_internado">Não Internados</option>
+                        <option value="internado">Institucionalizados</option>
+                        <option value="nao_internado">Não Institucionalizados</option>
                       </Form.Select>
                     </Col>
                     <Col md={3} className="mb-3">
@@ -353,8 +353,8 @@ const SataListaIdosos = () => {
                                   <ActionIconButton
                                     variant="outline-info" 
                                     size="sm"
-                                    title={!isAdmin ? 'Apenas Administradores podem criar internações' : 'Internação'}
-                                    ariaLabel={`Internação para ${idoso.nome}`}
+                                    title={!isAdmin ? 'Apenas Administradores podem institucionalizar' : 'Institucionalização'}
+                                    ariaLabel={`Institucionalização para ${idoso.nome}`}
                                     onClick={() => { if (disableActions) return; navigate('/internacoes?idosoId=' + idoso.id); }}
                                     disabled={disableActions}
                                     className={disableActions ? 'disabled-action' : undefined}
@@ -430,7 +430,7 @@ const SataListaIdosos = () => {
             </Modal.Header>
             <Modal.Body>
               <p>Tem certeza que deseja dar baixa no idoso <strong>{idosoSelecionado?.nome}</strong>?</p>
-              <p>Esta ação irá alterar o status para "Não Internado".</p>
+              <p>Esta ação irá alterar o status para "Não Institucionalizado".</p>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setMostrarModalConfirmacao(false)}>
@@ -451,7 +451,7 @@ const SataListaIdosos = () => {
               <div className="p-3 rounded border border-danger bg-danger-subtle d-flex align-items-start">
                 <ExclamationTriangleFill className="text-danger me-2" size={24} />
                 <div>
-                  <p className="mb-1">Não é possível excluir este idoso pois ele está atualmente internado. Por favor, atualize o status do idoso antes de tentar novamente.</p>
+                  <p className="mb-1">Não é possível excluir este idoso pois ele está atualmente institucionalizado. Por favor, atualize o status do idoso antes de tentar novamente.</p>
                 </div>
               </div>
             </Modal.Body>
@@ -470,7 +470,7 @@ const SataListaIdosos = () => {
                 <ExclamationTriangleFill className="text-danger me-2" size={24} />
                 <div>
                   <p className="mb-1">{mensagemAlertaRelacionamentos || 'Não é possível excluir este idoso por existir vínculo com outros registros.'}</p>
-                  <p className="mb-0 small text-muted">Caso necessário, avalie remover ou desvincular registros relacionados (ex.: internações).</p>
+                  <p className="mb-0 small text-muted">Caso necessário, avalie remover ou desvincular registros relacionados (ex.: institucionalizações).</p>
                 </div>
               </div>
             </Modal.Body>

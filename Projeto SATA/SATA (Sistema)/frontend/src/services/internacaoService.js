@@ -1,41 +1,41 @@
-// Serviço de internações: abrir, encerrar e listar
+// Serviço de institucionalizações: abrir, encerrar e listar
 import api from './api';
 
 const internacaoService = {
-  // Lista todas as internações
+  // Lista todas as institucionalizações
   async listarTodas() {
     try {
       const response = await api.get('/internacoes');
       return response.data.data || [];
     } catch (error) {
-      console.error('Erro ao listar internações:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao buscar internações');
+      console.error('Erro ao listar institucionalizações:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao buscar institucionalizações');
     }
   },
 
-  // Busca internação por ID
+  // Busca institucionalização por ID
   async buscarPorId(id) {
     try {
       const response = await api.get(`/internacoes/${id}`);
       return response.data.data;
     } catch (error) {
-      console.error('Erro ao buscar internação:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao buscar internação');
+      console.error('Erro ao buscar institucionalização:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao buscar institucionalização');
     }
   },
 
-  // Cria nova internação
+  // Cria nova institucionalização
   async criar(dadosInternacao) {
     try {
       const response = await api.post('/internacoes', dadosInternacao);
       return response.data.data;
     } catch (error) {
-      console.error('Erro ao criar internação:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao criar internação');
+      console.error('Erro ao criar institucionalização:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao criar institucionalização');
     }
   },
 
-  // Dá baixa na internação
+  // Dá baixa na institucionalização
   async darBaixa(id, motivoSaida) {
     try {
       const response = await api.put(`/internacoes/${id}/baixa`, {
@@ -43,8 +43,8 @@ const internacaoService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Erro ao dar baixa na internação:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao dar baixa na internação');
+      console.error('Erro ao dar baixa na institucionalização:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao dar baixa na institucionalização');
     }
   },
 
@@ -53,14 +53,14 @@ const internacaoService = {
     return this.darBaixa(id, motivoSaida);
   },
 
-  // Lista internações ativas
+  // Lista institucionalizações ativas
   async listarAtivas() {
     try {
       const response = await api.get('/internacoes/ativas');
       return response.data.data || [];
     } catch (error) {
-      console.error('Erro ao buscar internações ativas:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao buscar internações ativas');
+      console.error('Erro ao buscar institucionalizações ativas:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao buscar institucionalizações ativas');
     }
   },
 
