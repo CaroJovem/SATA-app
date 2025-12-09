@@ -410,7 +410,7 @@ const SataListaIdosos = () => {
               <Modal.Title>Confirmar Exclusão</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <p>Tem certeza que deseja excluir este idoso? Esta ação não pode ser desfeita.</p>
+              <p>Tem certeza que deseja excluir este idoso? Esta ação removerá permanentemente este idoso e todas as observações associadas. Esta operação não pode ser desfeita.</p>
               <p className="fw-bold">{idosoSelecionado?.nome}</p>
             </Modal.Body>
             <Modal.Footer>

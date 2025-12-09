@@ -437,10 +437,6 @@ async updateStatus(req, res) {
             const totalInternacoes = Array.isArray(totRows) && totRows[0] ? Number(totRows[0].cnt) : 0;
             const [totObs] = await conn.execute('SELECT COUNT(*) AS cnt FROM observacoes_idosos WHERE idoso_id = ?', [id]);
             const totalObservacoes = Array.isArray(totObs) && totObs[0] ? Number(totObs[0].cnt) : 0;
-            if (totalObservacoes > 0) {
-                conn.release();
-                return res.status(409).json({ success: false, message: 'Não é possível excluir: há observações registradas para este idoso.' });
-            }
             const [totDoa] = await conn.execute('SELECT COUNT(*) AS cnt FROM doacoes WHERE idoso_id = ?', [id]);
             const totalDoacoes = Array.isArray(totDoa) && totDoa[0] ? Number(totDoa[0].cnt) : 0;
             if (totalDoacoes > 0) {
@@ -450,7 +446,13 @@ async updateStatus(req, res) {
 
             await conn.beginTransaction();
 
-            // Sem remoção de históricos vinculados
+            // Remove observações vinculadas ao idoso
+            if (totalObservacoes > 0) {
+                await conn.execute('DELETE FROM observacoes_idosos WHERE idoso_id = ?', [id]);
+            }
+
+            // Remove todas internações
+            await conn.execute('DELETE FROM internacoes WHERE idoso_id = ?', [id]);
 
             // Deleta o idoso
             const [delRes] = await conn.execute('DELETE FROM idosos WHERE id = ?', [id]);
@@ -480,6 +482,9 @@ async updateStatus(req, res) {
             try {
                 const { logDeletion } = require('../utils/auditLogger');
                 const actor = req.user ? { id: req.user.id, username: req.user.username, role: req.user.role } : null;
+                if (totalObservacoes > 0) {
+                  logDeletion({ entity: 'observacoes_idosos', entityId: Number(id), actor, details: { observacoesRemovidas: totalObservacoes } });
+                }
                 logDeletion({ entity: 'idoso', entityId: Number(id), actor, details: { internacoesRemovidas: totalInternacoes } });
             } catch {}
 
