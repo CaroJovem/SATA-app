@@ -29,7 +29,6 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [unidadeSelecionada, setUnidadeSelecionada] = useState("Unidade(s)");
-  const [unidadeOutro, setUnidadeOutro] = useState("");
 
     useEffect(() => {
         if (!doacaoEdit) return;
@@ -119,17 +118,15 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
     // Removido: doador é selecionado via SelectDoador com id e nome
 
     // Sincroniza seleção de unidade quando dados da doação mudarem
-    useEffect(() => {
+  useEffect(() => {
         const raw = String(doaOutros?.doacao?.unidade_medida || '').trim();
-        if (!raw) { setUnidadeSelecionada('Unidade(s)'); setUnidadeOutro(''); return; }
+        if (!raw) { setUnidadeSelecionada('Unidade(s)'); return; }
         const map = { 'unidade(s)': 'Unidade(s)', 'kg': 'Kg', 'l': 'L', 'pacotes': 'Pacotes', 'caixas': 'Caixas', 'm': 'm' };
         const lower = raw.toLowerCase();
         if (map[lower]) {
             setUnidadeSelecionada(map[lower]);
-            setUnidadeOutro('');
         } else {
             setUnidadeSelecionada('Outro');
-            setUnidadeOutro(raw);
         }
     }, [doaOutros?.doacao?.unidade_medida]);
 
@@ -137,25 +134,9 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
         const value = e.target.value;
         setUnidadeSelecionada(value);
         if (value === 'Outro') {
-            setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: '' } }));
+            setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: 'Outro' } }));
         } else {
-            setUnidadeOutro('');
             setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
-            setErrors(prev => ({ ...prev, unidade_medida: null }));
-        }
-    }
-
-    const handleChangeUnidadeOutro = (e) => {
-        const value = e.target.value;
-        setUnidadeOutro(value);
-        setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
-        if (!value || String(value).trim() === '') {
-            setErrors(prev => ({ ...prev, unidade_medida: 'Informe a unidade' }));
-            setValidated(false);
-        } else if (!isNaN(value)) {
-            setErrors(prev => ({ ...prev, unidade_medida: 'A unidade (Outro) deve ser texto válido' }));
-            setValidated(false);
-        } else {
             setErrors(prev => ({ ...prev, unidade_medida: null }));
         }
     }
@@ -281,9 +262,6 @@ function FormEditarOutros({ show, onEdit, doacaoEdit }) {
                                             <option value="m">m</option>
                                             <option value="Outro">Outro</option>
                                         </Form.Select>
-                                        {unidadeSelecionada === 'Outro' && (
-                                            <Form.Control className="mt-2" placeholder="Especifique a unidade" value={unidadeOutro} onChange={handleChangeUnidadeOutro} isInvalid={!!errors.unidade_medida} required />
-                                        )}
                                         <Form.Control.Feedback type="invalid">
                                             {errors.unidade_medida}
                                         </Form.Control.Feedback>

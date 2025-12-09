@@ -30,7 +30,6 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [unidadeSelecionada, setUnidadeSelecionada] = useState("Unidade(s)");
-  const [unidadeOutro, setUnidadeOutro] = useState("");
 
     useEffect(() => {
         if (!doacaoEdit) return;
@@ -112,40 +111,23 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
     const value = e.target.value;
     setUnidadeSelecionada(value);
     if (value === 'Outro') {
-      setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: '' } }));
-    } else {
-      setUnidadeOutro('');
-      setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
+      setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: 'Outro' } }));
       setErrors(prev => ({ ...prev, unidade_medida: null }));
-    }
-  }
-
-  const handleChangeUnidadeOutro = (e) => {
-    const value = e.target.value;
-    setUnidadeOutro(value);
-    setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
-    if (!value || String(value).trim() === '') {
-      setErrors(prev => ({ ...prev, unidade_medida: 'Informe a unidade' }));
-      setValidated(false);
-    } else if (!isNaN(value)) {
-      setErrors(prev => ({ ...prev, unidade_medida: 'A unidade (Outro) deve ser texto válido' }));
-      setValidated(false);
     } else {
+      setDoaAlimentos(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
       setErrors(prev => ({ ...prev, unidade_medida: null }));
     }
   }
 
   useEffect(() => {
     const raw = String(doaAlimentos?.doacao?.unidade_medida || '').trim();
-    if (!raw) { setUnidadeSelecionada('Unidade(s)'); setUnidadeOutro(''); return; }
+    if (!raw) { setUnidadeSelecionada('Unidade(s)'); return; }
     const map = { 'unidade(s)': 'Unidade(s)', 'kg': 'Kg', 'l': 'L', 'pacotes': 'Pacotes', 'caixas': 'Caixas', 'm': 'm' };
     const lower = raw.toLowerCase();
     if (map[lower]) {
       setUnidadeSelecionada(map[lower]);
-      setUnidadeOutro('');
     } else {
       setUnidadeSelecionada('Outro');
-      setUnidadeOutro(raw);
     }
   }, [doaAlimentos?.doacao?.unidade_medida]);
 
@@ -275,9 +257,6 @@ function FormEditarAlim({ show, doacaoEdit, onEdit }) {
                   <option value="m">m</option>
                   <option value="Outro">Outro</option>
                 </Form.Select>
-                {unidadeSelecionada === 'Outro' && (
-                  <Form.Control className="mt-2" placeholder="Especifique a unidade" value={unidadeOutro} onChange={handleChangeUnidadeOutro} isInvalid={!!errors.unidade_medida} required />
-                )}
                 <Form.Control.Feedback type="invalid">
                   {errors.unidade_medida}
                 </Form.Control.Feedback>

@@ -37,7 +37,6 @@ function FormOutros({ onSave }) {
     nome: ""
   });
   const [unidadeSelecionada, setUnidadeSelecionada] = useState("Unidade(s)");
-  const [unidadeOutro, setUnidadeOutro] = useState("");
   const [showSimilarDialog, setShowSimilarDialog] = useState(false);
   const [similarOptions, setSimilarOptions] = useState([]);
   const [pendingSubmission, setPendingSubmission] = useState(null);
@@ -165,11 +164,10 @@ function FormOutros({ onSave }) {
     } else {
       setErrors({});
       const isOutro = unidadeSelecionada === 'Outro';
-      const unidadeVal = isOutro ? String(unidadeOutro).trim() : (doaOutros?.doacao?.unidade_medida || 'Unidade(s)');
-      const obsExtra = isOutro && unidadeOutro ? '' : '';
+      const unidadeVal = isOutro ? 'Outro' : (doaOutros?.doacao?.unidade_medida || 'Unidade(s)');
       const payload = {
         ...doaOutros,
-        obs: `${doaOutros?.obs || ''}${obsExtra}`.trim(),
+        obs: `${doaOutros?.obs || ''}`.trim(),
         doacao: { ...doaOutros?.doacao, unidade_medida: unidadeVal }
       };
       try {
@@ -179,7 +177,7 @@ function FormOutros({ onSave }) {
         );
         if (Array.isArray(similares) && similares.length > 0) {
           setSimilarOptions(similares);
-          setPendingSubmission(doaOutros);
+          setPendingSubmission(payload);
           setShowSimilarDialog(true);
           return;
         }
@@ -215,25 +213,10 @@ function FormOutros({ onSave }) {
     const value = e.target.value;
     setUnidadeSelecionada(value);
     if (value === 'Outro') {
-      setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: '' } }));
-    } else {
-      setUnidadeOutro('');
-      setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
+      setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: 'Outro' } }));
       setErrors(prev => ({ ...prev, unidade_medida: null }));
-    }
-  }
-
-  const handleChangeUnidadeOutro = (e) => {
-    const value = e.target.value;
-    setUnidadeOutro(value);
-    setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
-    if (!value || String(value).trim() === '') {
-      setErrors(prev => ({ ...prev, unidade_medida: 'Informe a unidade' }));
-      setValidated(false);
-    } else if (!isNaN(value)) {
-      setErrors(prev => ({ ...prev, unidade_medida: 'A unidade (Outro) deve ser texto válido' }));
-      setValidated(false);
     } else {
+      setDoaOutros(prev => ({ ...prev, doacao: { ...prev.doacao, unidade_medida: value } }));
       setErrors(prev => ({ ...prev, unidade_medida: null }));
     }
   }
@@ -297,9 +280,6 @@ function FormOutros({ onSave }) {
                   <option value="m">m</option>
                   <option value="Outro">Outro</option>
                 </Form.Select>
-                {unidadeSelecionada === 'Outro' && (
-                  <Form.Control className="mt-2" placeholder="Especifique a unidade" value={unidadeOutro} onChange={handleChangeUnidadeOutro} isInvalid={!!errors.unidade_medida} required />
-                )}
                 <Form.Control.Feedback type="invalid">
                   {errors.unidade_medida}
                 </Form.Control.Feedback>
