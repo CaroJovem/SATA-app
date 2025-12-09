@@ -163,7 +163,14 @@ function FormOutros({ onSave }) {
       setErrors(newErrors);
     } else {
       setErrors({});
-      // Buscar similares antes de salvar
+      const isOutro = unidadeSelecionada === 'Outro';
+      const unidadeVal = isOutro ? 'Outro' : (doaOutros?.doacao?.unidade_medida || 'Unidade(s)');
+      const obsExtra = isOutro && unidadeOutro ? ` [Unidade personalizada: ${String(unidadeOutro).trim()}]` : '';
+      const payload = {
+        ...doaOutros,
+        obs: `${doaOutros?.obs || ''}${obsExtra}`.trim(),
+        doacao: { ...doaOutros?.doacao, unidade_medida: unidadeVal }
+      };
       try {
         const similares = await donationStockService.buscarSimilares(
           doaOutros?.doacao?.item ?? '',
@@ -179,13 +186,13 @@ function FormOutros({ onSave }) {
         console.warn('Falha ao buscar similares, prosseguindo com cadastro.', err?.message || err);
       }
 
-      onSave(doaOutros);
+      onSave(payload);
       setValidated(true);
       setShowAlert(true);
       limpaForm();
       setTimeout(() => { setShowAlert(false); }, 3000);
     }
-  }
+  };
 
   const handleConfirmSimilar = (produtoId, newName) => {
     const submission = { ...(pendingSubmission || doaOutros) };

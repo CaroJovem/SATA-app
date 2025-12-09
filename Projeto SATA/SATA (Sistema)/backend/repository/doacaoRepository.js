@@ -35,12 +35,14 @@ class DoacaoRepository {
             d.idoso, d.idoso_id, d.evento_id AS eventoId,
             dd.valor AS valor, dd.forma_pagamento AS forma_pagamento, dd.comprovante AS comprovante,
             da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
-            di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, di.unidade_medida AS unidade_medida,
+            di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+            COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
             dr.id as doadorId, dr.nome as doadorNome,
             e.titulo AS eventoTitulo
             FROM doacoes d
             LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id
             LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id
+            LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
             LEFT JOIN doacoes_itens di ON di.doacao_id = d.id
             LEFT JOIN doadores dr ON d.doador = dr.id
             LEFT JOIN eventos e ON d.evento_id = e.id`;
@@ -65,13 +67,15 @@ class DoacaoRepository {
                 d.idoso, NULL as idoso_id, d.evento_id AS eventoId,
                 dd.valor AS valor, dd.forma_pagamento AS forma_pagamento, dd.comprovante AS comprovante,
                 da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
-                di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, di.unidade_medida AS unidade_medida,
+                di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+                COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
                 dr.id as doadorId, dr.nome as doadorNome,
                 e.titulo AS eventoTitulo
                 FROM doacoes d
                 LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id
                 LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id
                 LEFT JOIN doacoes_itens di ON di.doacao_id = d.id
+                LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
                 LEFT JOIN doadores dr ON d.doador = dr.id
                 LEFT JOIN eventos e ON d.evento_id = e.id`;
                 const [rows] = await db.execute(sql);
@@ -100,7 +104,8 @@ class DoacaoRepository {
             d.idoso, d.idoso_id, i.nome as idosoNome, d.evento_id AS eventoId,
             dd.valor AS valor, dd.forma_pagamento AS forma_pagamento, dd.comprovante AS comprovante,
             da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
-            di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, di.unidade_medida AS unidade_medida,
+            di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+            COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
             dr.id as doadorId, dr.nome as doadorNome,
             e.titulo AS eventoTitulo
             FROM doacoes d 
@@ -108,6 +113,7 @@ class DoacaoRepository {
             LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id
             LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id
             LEFT JOIN doacoes_itens di ON di.doacao_id = d.id
+            LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
             LEFT JOIN doadores dr ON d.doador = dr.id
             LEFT JOIN eventos e ON d.evento_id = e.id
             WHERE d.id = ?`, [id]);
@@ -133,7 +139,8 @@ class DoacaoRepository {
                 d.idoso, NULL as idoso_id, d.idoso as idosoNome, d.evento_id AS eventoId,
                 dd.valor AS valor,
                 da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
-                di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, di.unidade_medida AS unidade_medida,
+            di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+            COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
                 dr.id as doadorId, dr.nome as doadorNome,
                 e.titulo AS eventoTitulo,
                 p.nome AS produto_nome, p.categoria AS produto_categoria
@@ -174,12 +181,14 @@ class DoacaoRepository {
             dd.valor AS valor,
             da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
             di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+            COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
             dr.id as doadorId, dr.nome as doadorNome,
             e.titulo AS eventoTitulo
             FROM doacoes d
             LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id
             LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id
             LEFT JOIN doacoes_itens di ON di.doacao_id = d.id
+            LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
             LEFT JOIN doadores dr ON d.doador = dr.id
             LEFT JOIN eventos e ON d.evento_id = e.id
             WHERE d.doador = ?`;
@@ -189,7 +198,7 @@ class DoacaoRepository {
                 valor: r.valor,
                 item: r.tipo_alimento || r.descricao_item || null,
                 qntd: (r.quantidade_alimento ?? r.quantidade_item) || null,
-                unidade_medida: null,
+                unidade_medida: r.unidade_medida || null,
                 tipo_alimento: r.tipo_alimento,
                 descricao_item: r.descricao_item,
                 validade: r.validade,
@@ -203,12 +212,14 @@ class DoacaoRepository {
                 dd.valor AS valor,
                 da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade,
                 di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao,
+                COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida,
                 dr.id as doadorId, dr.nome as doadorNome,
                 e.titulo AS eventoTitulo
                 FROM doacoes d
                 LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id
                 LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id
                 LEFT JOIN doacoes_itens di ON di.doacao_id = d.id
+                LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento
                 LEFT JOIN doadores dr ON d.doador = dr.id
                 LEFT JOIN eventos e ON d.evento_id = e.id
                 WHERE d.doador = ?`;
@@ -218,7 +229,7 @@ class DoacaoRepository {
                     valor: r.valor,
                     item: r.tipo_alimento || r.descricao_item || null,
                     qntd: (r.quantidade_alimento ?? r.quantidade_item) || null,
-                    unidade_medida: null,
+                    unidade_medida: r.unidade_medida || null,
                     tipo_alimento: r.tipo_alimento,
                     descricao_item: r.descricao_item,
                     validade: r.validade,
@@ -253,12 +264,13 @@ class DoacaoRepository {
             }
 
             const daSelect = `da.tipo_alimento AS tipo_alimento, da.quantidade AS quantidade_alimento, da.validade AS validade`;
-            const diSelect = `di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, di.unidade_medida AS unidade_medida`;
+            const diSelect = `di.descricao_item AS descricao_item, di.quantidade AS quantidade_item, di.estado_conservacao AS estado_conservacao, COALESCE(di.unidade_medida, pA.unidade_medida) AS unidade_medida`;
             const ddSelect = `dd.valor AS valor, dd.forma_pagamento AS forma_pagamento, dd.comprovante AS comprovante`;
 
             const joinDD = `LEFT JOIN doacoes_dinheiro dd ON dd.doacao_id = d.id`;
             const joinDA = `LEFT JOIN doacoes_alimentos da ON da.doacao_id = d.id`;
             const joinDI = `LEFT JOIN doacoes_itens di ON di.doacao_id = d.id`;
+            const joinPA = `LEFT JOIN produtos pA ON pA.nome = da.tipo_alimento`;
 
             if (destinatario !== "todos") {
                 if (destinatario === "instituicao") {
@@ -274,26 +286,27 @@ class DoacaoRepository {
                 const raw = busca.toLowerCase();
                 const safe = raw.replace(/[\\_%]/g, (m) => `\\${m}`);
                 const buscaParam = `%${safe}%`;
-                const likeParts = [
-                    "LOWER(da.tipo_alimento) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(di.descricao_item) COLLATE utf8mb4_general_ci LIKE ?",
-                    "CAST(da.quantidade AS CHAR) LIKE ?",
-                    "CAST(di.quantidade AS CHAR) LIKE ?",
-                    "CAST(dd.valor AS CHAR) LIKE ?",
-                    "LOWER(dd.forma_pagamento) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(dd.comprovante) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(d.idoso) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(e.titulo) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(d.obs) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(dr.nome) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(d.tipo) COLLATE utf8mb4_general_ci LIKE ?",
-                    "DATE_FORMAT(d.data, '%d/%m/%Y') LIKE ?",
-                    "CAST(d.data AS CHAR) LIKE ?",
-                    "DATE_FORMAT(da.validade, '%d/%m/%Y') LIKE ?",
-                    "CAST(da.validade AS CHAR) LIKE ?",
-                    "LOWER(di.estado_conservacao) COLLATE utf8mb4_general_ci LIKE ?",
-                    "LOWER(di.unidade_medida) COLLATE utf8mb4_general_ci LIKE ?"
-                ];
+            const likeParts = [
+                "LOWER(da.tipo_alimento) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(di.descricao_item) COLLATE utf8mb4_general_ci LIKE ?",
+                "CAST(da.quantidade AS CHAR) LIKE ?",
+                "CAST(di.quantidade AS CHAR) LIKE ?",
+                "CAST(dd.valor AS CHAR) LIKE ?",
+                "LOWER(dd.forma_pagamento) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(dd.comprovante) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(d.idoso) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(e.titulo) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(d.obs) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(dr.nome) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(d.tipo) COLLATE utf8mb4_general_ci LIKE ?",
+                "DATE_FORMAT(d.data, '%d/%m/%Y') LIKE ?",
+                "CAST(d.data AS CHAR) LIKE ?",
+                "DATE_FORMAT(da.validade, '%d/%m/%Y') LIKE ?",
+                "CAST(da.validade AS CHAR) LIKE ?",
+                "LOWER(di.estado_conservacao) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(di.unidade_medida) COLLATE utf8mb4_general_ci LIKE ?",
+                "LOWER(pA.unidade_medida) COLLATE utf8mb4_general_ci LIKE ?"
+            ];
                 if (likeParts.length) {
                     where.push(`(${likeParts.join(' OR ')})`);
                     for (let i = 0; i < likeParts.length; i++) {
@@ -318,6 +331,7 @@ class DoacaoRepository {
             ${joinDD}
             ${joinDA}
             ${joinDI}
+            ${joinPA}
             LEFT JOIN doadores dr ON d.doador = dr.id
             LEFT JOIN eventos e ON d.evento_id = e.id ${where.length > 0 ? " WHERE " + where.join(" AND ") : ""}`;
             const [rows] = await db.execute(sql, params);
