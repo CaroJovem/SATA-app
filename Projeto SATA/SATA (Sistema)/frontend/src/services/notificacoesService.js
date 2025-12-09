@@ -80,8 +80,18 @@ export async function obterNotificacoesRecentes(limite = 10, usuario_id = null) 
 export async function obterContadores(usuario_id = null) {
   const params = {};
   if (usuario_id) params.usuario_id = usuario_id;
-  const { data } = await api.get('/notificacoes/contadores', { params });
-  return data?.data ?? data;
+  try {
+    const { data } = await api.get('/notificacoes/contadores', { params });
+    const res = data?.data ?? data;
+    if (res && (res.total != null || res.nao_lidas != null)) return res;
+  } catch (e) { void e; }
+  try {
+    const { data: dtTotal } = await api.get('/notificacoes', { params: { pageSize: 1 } });
+    const total = dtTotal?.pagination?.total ?? dtTotal?.total ?? (Array.isArray(dtTotal?.data) ? dtTotal.data.length : 0);
+    const { data: dtNao } = await api.get('/notificacoes', { params: { lida: false, pageSize: 1 } });
+    const naoLidas = dtNao?.pagination?.total ?? dtNao?.total ?? (Array.isArray(dtNao?.data) ? dtNao.data.length : 0);
+    return { total, nao_lidas: naoLidas, lidas: Math.max(0, Number(total || 0) - Number(naoLidas || 0)) };
+  } catch (e) { void e; return { total: 0, nao_lidas: 0, lidas: 0 }; }
 }
 
 // Cria notificação de cadastro de item/registro
