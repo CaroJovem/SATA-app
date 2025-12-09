@@ -1,25 +1,16 @@
 import React, { useRef, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Pencil, Trash, Eye } from 'react-bootstrap-icons';
 import ActionIconButton from '../../ui/ActionIconButton';
 import StandardTable from '../../ui/StandardTable';
 import { useAuth } from '../../../hooks/useAuth';
 import { formatDate } from '../../../utils/dateUtils';
 
-function TabelaDoacoes({ doacoes, doacoesApp, onEdit, onDelete, handleDelete, loaderRef: externalLoaderRef, showDelete: externalShowDelete, setShowDelete: externalSetShowDelete, printUrl, hiddenColumns = [] }) {
+function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef: externalLoaderRef, showDelete: externalShowDelete, setShowDelete: externalSetShowDelete, printUrl, hiddenColumns = [] }) {
   const auth = useAuth();
   const isAdmin = Boolean(auth && auth.isAdmin);
-  const normalizeRole = (role) => {
-    if (!role) return role;
-    const r = String(role).toLowerCase();
-    if (r.includes('admin')) return 'Admin';
-    if (r.includes('funcionario') || r.includes('funcionário')) return 'Funcionário';
-    return role;
-  };
-  const canEdit = ['Admin','Funcionário'].includes(normalizeRole(auth?.user?.role));
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Compatibilidade com props antigas da página Doacoes.jsx
   const items = Array.isArray(doacoes) ? doacoes : (Array.isArray(doacoesApp) ? doacoesApp : []);
@@ -166,13 +157,13 @@ function TabelaDoacoes({ doacoes, doacoesApp, onEdit, onDelete, handleDelete, lo
                           <Eye />
                         </ActionIconButton>
                         <ActionIconButton
-                          className={!canEdit ? 'disabled-action' : undefined}
-                          title={!canEdit ? 'Sem permissão para editar' : 'Editar'}
+                          className='disabled-action'
+                          title='Editar'
                           size='sm'
-                          onClick={!canEdit ? undefined : () => { if (typeof onEdit === 'function') { onEdit(d); } else { navigate(`/doacoes/editar/${d.id}`, { state: { background: location } }); } }}
+                          onClick={undefined}
                           variant='outline-primary'
-                          disabled={!canEdit}
-                          ariaLabel={!canEdit ? 'Sem permissão para editar' : 'Editar doação'}
+                          disabled={true}
+                          ariaLabel='Editar doação'
                         >
                           <Pencil />
                         </ActionIconButton>

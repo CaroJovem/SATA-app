@@ -1,6 +1,6 @@
 const assert = require('assert');
 const DoadorController = require('../controllers/doadorController');
-const DoadorRepository = require('../repository/doadorRepository');
+const DoadorRepository = require('../repository/doadoRepository');
 
 function mockRes() {
   let statusCode = 200; let jsonBody = null;
@@ -29,4 +29,3 @@ module.exports = async function donorsCreateValidation() {
     if (d && d.id) { await DoadorRepository.delete(d.id); }
   } catch {}
 }
-

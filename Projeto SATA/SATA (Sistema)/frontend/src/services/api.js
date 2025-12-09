@@ -1,6 +1,4 @@
 import axios from 'axios';
-
-const envBase = null;
 const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
 const isLocalhost = /^http:\/\/localhost(?::\d+)?$/i.test(origin) || /^http:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin);
 const fallbackBase = isLocalhost ? 'http://localhost:3000/api' : origin.replace(/\/?$/, '') + '/api';

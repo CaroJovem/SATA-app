@@ -77,7 +77,7 @@ export default function Perfis() {
       try {
         const res = await authService.getPermissions();
         if (res?.success) setPermissoes(res.data || null);
-      } catch {}
+      } catch { void 0; }
     })();
   }, []);
 
