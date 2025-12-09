@@ -435,10 +435,6 @@ async updateStatus(req, res) {
             // Preservar histórico associado
             const [totRows] = await conn.execute('SELECT COUNT(*) AS cnt FROM internacoes WHERE idoso_id = ?', [id]);
             const totalInternacoes = Array.isArray(totRows) && totRows[0] ? Number(totRows[0].cnt) : 0;
-            if (totalInternacoes > 0) {
-                conn.release();
-                return res.status(409).json({ success: false, message: 'Não é possível excluir: há histórico de internações para este idoso.' });
-            }
             const [totObs] = await conn.execute('SELECT COUNT(*) AS cnt FROM observacoes_idosos WHERE idoso_id = ?', [id]);
             const totalObservacoes = Array.isArray(totObs) && totObs[0] ? Number(totObs[0].cnt) : 0;
             if (totalObservacoes > 0) {
@@ -484,7 +480,7 @@ async updateStatus(req, res) {
             try {
                 const { logDeletion } = require('../utils/auditLogger');
                 const actor = req.user ? { id: req.user.id, username: req.user.username, role: req.user.role } : null;
-                logDeletion({ entity: 'idoso', entityId: Number(id), actor, details: { motivo: 'exclusão sem registros relacionados' } });
+                logDeletion({ entity: 'idoso', entityId: Number(id), actor, details: { internacoesRemovidas: totalInternacoes } });
             } catch {}
 
             if (ok) {
