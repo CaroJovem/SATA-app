@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Pencil, Trash, Eye } from 'react-bootstrap-icons';
 import ActionIconButton from '../../ui/ActionIconButton';
 import StandardTable from '../../ui/StandardTable';
@@ -10,7 +10,9 @@ import { formatDate } from '../../../utils/dateUtils';
 function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef: externalLoaderRef, showDelete: externalShowDelete, setShowDelete: externalSetShowDelete, printUrl, hiddenColumns = [] }) {
   const auth = useAuth();
   const isAdmin = Boolean(auth && auth.isAdmin);
+  const canEdit = isAdmin;
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Compatibilidade com props antigas da página Doacoes.jsx
   const items = Array.isArray(doacoes) ? doacoes : (Array.isArray(doacoesApp) ? doacoesApp : []);
@@ -157,13 +159,13 @@ function TabelaDoacoes({ doacoes, doacoesApp, onDelete, handleDelete, loaderRef:
                           <Eye />
                         </ActionIconButton>
                         <ActionIconButton
-                          className='disabled-action'
-                          title='Editar'
+                          className={!canEdit ? 'disabled-action' : undefined}
+                          title={!canEdit ? 'Sem permissão para editar' : 'Editar'}
                           size='sm'
-                          onClick={undefined}
+                          onClick={!canEdit ? undefined : () => { navigate(`/doacoes/editar/${d.id}`, { state: { background: location } }); }}
                           variant='outline-primary'
-                          disabled={true}
-                          ariaLabel='Editar doação'
+                          disabled={!canEdit}
+                          ariaLabel={!canEdit ? 'Sem permissão para editar' : 'Editar doação'}
                         >
                           <Pencil />
                         </ActionIconButton>

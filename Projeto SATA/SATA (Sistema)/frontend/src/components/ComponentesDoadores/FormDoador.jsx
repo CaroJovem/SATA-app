@@ -11,7 +11,6 @@ function FormDoador({ onSubmit, doadores }) {
     nome: "",
     cpf: "",
     cnpj: "",
-    dataNascimento: "",
     representante: "",
     telefone: "",
     rg: "",
@@ -31,7 +30,6 @@ function FormDoador({ onSubmit, doadores }) {
       nome: "",
       cpf: "",
       cnpj: "",
-      dataNascimento: "",
       representante: "",
       telefone: "",
       rg: "",
@@ -65,7 +63,7 @@ function FormDoador({ onSubmit, doadores }) {
     if (tipo === 'PF') {
       setDoador(prev => ({ ...prev, cnpj: "", representante: "" }));
     } else {
-      setDoador(prev => ({ ...prev, cpf: "", dataNascimento: "" }));
+      setDoador(prev => ({ ...prev, cpf: "" }));
     }
   };
 
@@ -118,23 +116,7 @@ function FormDoador({ onSubmit, doadores }) {
     }, 3000);
   };
 
-  const handleChangeDataNascimento = (e) => {
-    const value = e.target.value;
-    setDoador(prev => ({ ...prev, dataNascimento: value }));
-    if (!value) {
-      setErrors(prev => ({ ...prev, dataNascimento: "Data de nascimento é obrigatória" }));
-      setValidated(false);
-    } else {
-      const dt = new Date(value);
-      const hoje = new Date(); hoje.setHours(0,0,0,0);
-      if (isNaN(dt.getTime()) || dt > hoje) {
-        setErrors(prev => ({ ...prev, dataNascimento: "Data de nascimento inválida" }));
-        setValidated(false);
-      } else {
-        setErrors(prev => ({ ...prev, dataNascimento: null }));
-      }
-    }
-  };
+  
 
   const handleChangeRepresentante = (e) => {
     const value = e.target.value;
@@ -271,10 +253,6 @@ function FormDoador({ onSubmit, doadores }) {
         newErrors.cpf = "CPF inválido";
         setValidated(false);
       }
-      if (!doador.dataNascimento) {
-        newErrors.dataNascimento = "Data de nascimento é obrigatória";
-        setValidated(false);
-      }
     } else {
       if (!doador.cnpj) {
         newErrors.cnpj = "CNPJ é obrigatório";
@@ -402,17 +380,6 @@ function FormDoador({ onSubmit, doadores }) {
                         placeholder="123.456.789-01" 
                       />
                       <Form.Control.Feedback type="invalid">{errors.cpf}</Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="dataNascimento">
-                      <Form.Label>Data de Nascimento</Form.Label>
-                      <Form.Control 
-                        type="date"
-                        value={doador.dataNascimento}
-                        onChange={handleChangeDataNascimento}
-                        isInvalid={!!errors.dataNascimento}
-                        required
-                      />
-                      <Form.Control.Feedback type="invalid">{errors.dataNascimento}</Form.Control.Feedback>
                     </Form.Group>
                   </>
                 ) : (
