@@ -55,39 +55,12 @@ const Notificacoes = () => {
       setNotificacoes(items.slice(0, 20));
       const totalResp = Number(response.total || items.length || 0);
       setPaginacao(prev => ({ ...prev, total: totalResp }));
-      // Limpeza automática: manter apenas as 20 últimas no sistema (quando sem filtros e na página 1)
-      const semFiltros = !filtros.tipo && !filtros.lida && !filtros.busca && !filtros.prioridade;
-      if (semFiltros && paginacao.pagina === 1 && totalResp > 20) {
-        // Apaga páginas antigas além da primeira
-        try {
-          let page = 2;
-          const toDelete = [];
-          while ((page - 1) * paginacao.limite < totalResp && page <= Math.ceil(totalResp / paginacao.limite)) {
-            const older = await listarNotificacoes({
-              pagina: page,
-              limite: paginacao.limite,
-              ordenacao: 'data_criacao',
-              direcao: 'DESC'
-            });
-            const ids = (older.notificacoes || []).map(n => n.id).filter(Boolean);
-            if (ids.length > 0) toDelete.push(...ids);
-            page += 1;
-          }
-          if (toDelete.length > 0) {
-            await deletarVariasNotificacoes(toDelete);
-            // Recarrega contadores após limpeza
-            carregarContadores();
-          }
-        } catch (cleanupErr) {
-          console.error('Falha ao limpar notificações antigas:', cleanupErr?.message || cleanupErr);
-        }
-      }
     } catch (err) {
       setError('Erro ao carregar notificações: ' + err.message);
     } finally {
       setLoading(false);
     }
-  }, [filtros, paginacao.pagina, paginacao.limite, carregarContadores]);
+  }, [filtros, paginacao.pagina, paginacao.limite]);
 
   const carregarContadores = useCallback(async () => {
     try {
