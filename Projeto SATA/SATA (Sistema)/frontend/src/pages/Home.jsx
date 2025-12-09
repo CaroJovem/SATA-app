@@ -62,7 +62,7 @@ export default function Home() {
           eventosService.getAll().catch(() => []),
           financeiroService.list().catch(() => []),
           listarProdutos().catch(() => ({ success: false, data: [] })),
-          obterContadores(user?.id).catch(() => ({ total: 0, nao_lidas: 0 })),
+          obterContadores().catch(() => ({ total: 0, nao_lidas: 0 })),
         ]);
 
         const idososAtivos = Array.isArray(idosos) ? idosos.length : 0;
