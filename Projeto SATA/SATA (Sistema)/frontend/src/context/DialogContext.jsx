@@ -70,14 +70,23 @@ export function DialogProvider({ children }) {
     const originalConfirm = window.confirm;
     const originalPrompt = window.prompt;
 
-    window.alert = (msg) => { alert(msg); };
+    const shouldBlockMsg = (m) => {
+      const s = (typeof m === 'string' ? m : String(m || '')).toLowerCase();
+      return s.includes('conta') && s.includes('acesso') && (s.includes('selecion') || s.includes('atualiz'));
+    };
+    window.alert = (msg) => {
+      if (shouldBlockMsg(msg)) return; // não exibir
+      alert(msg);
+    };
     window.confirm = (msg) => {
+      if (shouldBlockMsg(msg)) return true; // confirmar sem exibir
       // Mostra UI customizada, mas retorna imediatamente para evitar travar fluxo síncrono
       // Para preservar o fluxo correto, use window.confirmAsync.
       confirm(msg);
       return false;
     };
     window.prompt = (msg, def) => {
+      if (shouldBlockMsg(msg)) return String(def ?? ''); // retornar valor padrão sem exibir
       prompt(msg, def ?? '');
       return null;
     };
