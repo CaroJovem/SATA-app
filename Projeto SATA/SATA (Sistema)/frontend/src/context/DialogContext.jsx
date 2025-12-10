@@ -12,8 +12,16 @@ export function DialogProvider({ children }) {
   useEffect(() => {
     if (!current && queue.length > 0) {
       const nextItem = queue[0];
-      const msg = String(nextItem?.message || '').trim();
-      if (msg === 'Selecione qual conta de acesso atualizar') {
+      const rawMsg = nextItem?.message;
+      const rawTitle = nextItem?.title;
+      const msg = (typeof rawMsg === 'string' ? rawMsg : String(rawMsg || '')).toLowerCase();
+      const title = (typeof rawTitle === 'string' ? rawTitle : String(rawTitle || '')).toLowerCase();
+      const shouldSuppress = (
+        msg.includes('conta de acesso') || title.includes('conta de acesso')
+      ) && (
+        msg.includes('atualiz') || title.includes('atualiz') || msg.includes('selecion') || title.includes('selecion')
+      );
+      if (shouldSuppress) {
         try {
           if (nextItem.type === 'confirm') nextItem.resolve(true);
           else if (nextItem.type === 'prompt') nextItem.resolve(nextItem.defaultValue ?? '');
