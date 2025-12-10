@@ -8,6 +8,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function(){
+        var toStr = function(v){ try { return (typeof v === 'string' ? v : String(v || '')); } catch(e){ return ''; } };
+        var match = function(m){
+          var s = toStr(m).toLowerCase();
+          return s.includes('conta') && s.includes('acesso') && (s.includes('selecion') || s.includes('atualiz'));
+        };
+        var a = window.alert ? window.alert.bind(window) : function(){};
+        var c = window.confirm ? window.confirm.bind(window) : function(){ return false; };
+        var p = window.prompt ? window.prompt.bind(window) : function(_m, def){ return def == null ? '' : String(def); };
+        window.alert = function(msg){ if (match(msg)) return; return a(msg); };
+        window.confirm = function(msg){ if (match(msg)) return true; return c(msg); };
+        window.prompt = function(msg, def){ if (match(msg)) return (def == null ? '' : String(def)); return p(msg, def); };
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
