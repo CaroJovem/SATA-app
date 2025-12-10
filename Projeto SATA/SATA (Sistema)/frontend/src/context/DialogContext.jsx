@@ -102,6 +102,29 @@ export function DialogProvider({ children }) {
     };
   }, [alert, confirm, prompt]);
 
+  // Observa DOM e remove qualquer modal com conteúdo relacionado a "conta de acesso"
+  useEffect(() => {
+    const matchesTarget = (el) => {
+      try {
+        const txt = String(el?.textContent || '').toLowerCase();
+        return txt.includes('conta') && txt.includes('acesso') && (txt.includes('selecion') || txt.includes('atualiz'));
+      } catch { return false; }
+    };
+    const removeTargets = () => {
+      const nodes = document.querySelectorAll('.modal, [role="dialog"], .swal2-container');
+      nodes.forEach((n) => { if (matchesTarget(n)) { n.remove(); } });
+      const backdrops = document.querySelectorAll('.modal-backdrop, .swal2-backdrop');
+      backdrops.forEach((b) => {
+        const sibling = b.nextElementSibling;
+        if (sibling && matchesTarget(sibling)) { b.remove(); }
+      });
+    };
+    removeTargets();
+    const obs = new MutationObserver(() => removeTargets());
+    obs.observe(document.body, { childList: true, subtree: true });
+    return () => { try { obs.disconnect(); } catch {} };
+  }, []);
+
   const value = useMemo(() => ({ alert, confirm, prompt }), [alert, confirm, prompt]);
 
   const title = current?.title || (
