@@ -508,7 +508,7 @@ class AuthController {
       const ok = await bcrypt.compare(current_password, user.password_hash);
       if (!ok) return res.status(400).json({ success: false, error: 'Senha atual incorreta' });
       const hash = await bcrypt.hash(new_password, 10);
-      const updated = await UserRepository.resetPasswordWithProcedure(user.id, user.id, hash);
+      const updated = await UserRepository.updatePasswordHash(user.id, hash);
       if (!updated) return res.status(500).json({ success: false, error: 'Não foi possível atualizar a senha' });
       try {
         const { logSecurityEvent } = require('../utils/auditLogger');
