@@ -12,6 +12,17 @@ export function DialogProvider({ children }) {
   useEffect(() => {
     if (!current && queue.length > 0) {
       const nextItem = queue[0];
+      const msg = String(nextItem?.message || '').trim();
+      if (msg === 'Selecione qual conta de acesso atualizar') {
+        try {
+          if (nextItem.type === 'confirm') nextItem.resolve(true);
+          else if (nextItem.type === 'prompt') nextItem.resolve(nextItem.defaultValue ?? '');
+          else nextItem.resolve();
+        } finally {
+          setQueue(old => old.slice(1));
+        }
+        return;
+      }
       setQueue(old => old.slice(1));
       setInputValue(nextItem.defaultValue ?? '');
       setCurrent(nextItem);
